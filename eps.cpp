@@ -6,6 +6,12 @@ void adminLogin(), staffLogin(), employeeLogin(), userAuthentication();
 void employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
 void clrscrn();
 
+int ID[100];
+string name[100];
+string position[100];
+string cityAddr[100];
+string department[100];
+
 int main() {
     userAuthentication();
     return 0;
@@ -48,7 +54,8 @@ void employeeRec() {
 }
 
 void addEmployee() {
-
+    cout << "\n\t----- Add New Employee ------" << endl;
+    cout << "\n\tEnter Employee ID: ";
 }
 
 void updateEmployee() {
