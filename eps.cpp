@@ -6,11 +6,17 @@ void adminLogin(), staffLogin(), employeeLogin(), userAuthentication();
 void employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
 void clrscrn();
 
-int ID[100];
-string name[100];
-string position[100];
-string cityAddr[100];
-string department[100];
+struct Employee {
+    int id;
+    string fullName;
+    string cityAddr;
+    string department;
+    string position;
+    double rate;
+};
+
+Employee employees[100];
+int employeeCount = 0;
 
 int main() {
     userAuthentication();
@@ -55,7 +61,29 @@ void employeeRec() {
 
 void addEmployee() {
     cout << "\n\t----- Add New Employee ------" << endl;
+    Employee newEmp;
     cout << "\n\tEnter Employee ID: ";
+    cin >> newEmp.id;
+    cout << "\n\tEnter Full Name: ";
+    cin.ignore();
+    getline(cin, newEmp.fullName);
+    cout << "\n\tEnter City Address: ";
+    getline(cin, newEmp.cityAddr);
+    cout << "\n\tEnter Department: ";
+    getline(cin, newEmp.department);
+    cout << "\n\tEnter Position: ";
+    getline(cin, newEmp.position);
+    cout << "\n\tEnter Rate: ";
+    cin >> newEmp.rate;
+
+    cout << "\n\tEmployee Added Successfully!" << endl;
+
+    cout << "\n\tEmployee ID:      " << newEmp.id << endl;
+    cout << "\tFull Name:        " << newEmp.fullName << endl;
+    cout << "\tCity Address:     " << newEmp.cityAddr << endl;
+    cout << "\tDepartment:       " << newEmp.department << endl;
+    cout << "\tPosition:         " << newEmp.position << endl;
+    cout << "\tRate:             " << newEmp.rate << endl;
 }
 
 void updateEmployee() {
