@@ -28,7 +28,46 @@ void deleteEmployee() {
 }
 
 void adminLogin() {
+    cout << "\n\t----- Admin Dashboard ------" << endl;
+    cout << "\n\t[1] Manage Employee Records" << endl;
+    cout << "\t[2] Manage Staff Accounts" << endl;
+    cout << "\t[3] Payroll Reports" << endl;
+    cout << "\t[0] Logout" << endl;
+    cout << "\n\tChoice: ";
+    char choice;
+    cin >> choice;
 
+    switch(choice) {
+        case '1':
+            addEmployee();
+            break;
+        case '2':
+            updateEmployee();
+            break;
+        case '3':
+            viewEmployee();
+            break;
+        case '0':
+            char confirm;
+            while(true) {
+                cout << "\n\tAre you sure you want to logout? (y/n): ";
+                cin >> confirm;
+                if(confirm == 'y' || confirm == 'Y') {
+                    cout << "\n\tLogging out..." << endl;
+                    break;
+                } else if(confirm == 'n' || confirm == 'N') {
+                    adminLogin();
+                    break;
+                } else {
+                    cout << "\n\tInvalid input! Please Try Again." << endl;
+                }
+            }
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            adminLogin();
+            break;
+    }
 }
 
 void staffLogin() {
