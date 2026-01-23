@@ -3,12 +3,48 @@
 using namespace std;
 
 void adminLogin(), staffLogin(), employeeLogin(), userAuthentication();
-void addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
+void employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
 void clrscrn();
 
 int main() {
     userAuthentication();
     return 0;
+}
+
+void employeeRec() {
+    cout << "\n\t----- Employee Records Management ------" << endl;
+    cout << "\n\t[1] Add Employee" << endl;
+    cout << "\t[2] Update Employee" << endl;
+    cout << "\t[3] View Employee" << endl;
+    cout << "\t[4] Delete Employee" << endl;
+    cout << "\t[0] Back" << endl;
+    cout << "\n\tChoice: ";
+    char choice;
+    cin >> choice;
+
+    clrscrn();
+
+    switch(choice) {
+        case '1':
+            addEmployee();
+            break;
+        case '2':
+            updateEmployee();
+            break;
+        case '3':
+            viewEmployee();
+            break;
+        case '4':
+            deleteEmployee();
+            break;
+        case '0':
+            adminLogin();
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            employeeRec();
+            break;
+    }
 }
 
 void addEmployee() {
@@ -37,15 +73,17 @@ void adminLogin() {
     char choice;
     cin >> choice;
 
+    clrscrn();
+
     switch(choice) {
         case '1':
-            addEmployee();
+            employeeRec();
             break;
         case '2':
-            updateEmployee();
+            
             break;
         case '3':
-            viewEmployee();
+            
             break;
         case '0':
             char confirm;
@@ -54,6 +92,7 @@ void adminLogin() {
                 cin >> confirm;
                 if(confirm == 'y' || confirm == 'Y') {
                     cout << "\n\tLogging out..." << endl;
+                    userAuthentication();
                     break;
                 } else if(confirm == 'n' || confirm == 'N') {
                     adminLogin();
