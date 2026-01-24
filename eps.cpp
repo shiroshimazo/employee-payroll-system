@@ -109,7 +109,61 @@ void updateEmployee() {
 }
 
 void viewEmployee() {
+    char choice;
+    cout << "\n\t[1] View All Employees" << endl;
+    cout << "\t[2] Search Employee by ID" << endl;
+    cout << "\t[0] Back" << endl;
+    cout << "\n\tChoice: ";
+    cin >> choice;
+    clrscrn();
 
+    switch() {
+        case '1':
+            cout << "\n\t----- All Employees ------" << endl;
+            for(int i = 0; i < employeeCount; i++) {
+                cout << "\n\tEmployee ID: " << employees[i].id << endl;
+                cout << "\tFull Name: " << employees[i].fullName << endl;
+                cout << "\tCity Address: " << employees[i].cityAddr << endl;
+                cout << "\tDepartment: " << employees[i].department << endl;
+                cout << "\tPosition: " << employees[i].position << endl;
+                cout << "\tRate: " << employees[i].rate << endl;
+            }
+            viewEmployee();
+            break;
+        case '2':
+            int searchId;
+            cout << "\n\tEnter Employee ID to Search: ";
+            cin >> searchId;
+            clrscrn();
+            {
+                bool found = false;
+                for(int i = 0; i < employeeCount; i++) {
+                    if(employees[i].id == searchId) {
+                        cout << "\n\t----- Employee Details ------" << endl;
+                        cout << "\n\tEmployee ID: " << employees[i].id << endl;
+                        cout << "\tFull Name: " << employees[i].fullName << endl;
+                        cout << "\tCity Address: " << employees[i].cityAddr << endl;
+                        cout << "\tDepartment: " << employees[i].department << endl;
+                        cout << "\tPosition: " << employees[i].position << endl;
+                        cout << "\tRate: " << employees[i].rate << endl;
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) {
+                    cout << "\n\tEmployee ID not found!" << endl;
+                }
+            }
+            viewEmployee();
+            break;
+        case '0':
+            employeeRec();
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            viewEmployee();
+            break;
+    }
 }
 
 void deleteEmployee() {
