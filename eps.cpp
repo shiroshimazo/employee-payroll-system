@@ -207,6 +207,7 @@ void updateEmployee() {
         outRec << employees[i].position << endl;
         outRec << employees[i].rate << endl;
     }
+    
     outRec.close();
     cout << "\n\tUpdated Employee Data:" << endl;
     cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
