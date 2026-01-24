@@ -62,7 +62,8 @@ void employeeRec() {
 }
 
 void addEmployee() {
-    ofstream empRec("employees.txt");
+    fstream empRec;
+    empRec.open("employees.txt", ios::app);
     cout << "\n\t----- Add New Employee ------" << endl;
     Employee newEmp;
     cout << "\n\tEnter Employee ID: ";
@@ -110,6 +111,22 @@ void updateEmployee() {
 }
 
 void viewEmployee() {
+    ifstream viewRec("employees.txt");
+    string empInformation;
+    employeeCount = 0;
+    if (viewRec.is_open()) {
+        while (viewRec >> employees[employeeCount].id) {
+            viewRec.ignore();
+            getline(viewRec, employees[employeeCount].fullName);
+            getline(viewRec, employees[employeeCount].cityAddr);
+            getline(viewRec, employees[employeeCount].department);
+            getline(viewRec, employees[employeeCount].position);
+            viewRec >> employees[employeeCount].rate;
+            viewRec.ignore();
+            employeeCount++;
+        }
+        viewRec.close();
+    }
     char choice;
     cout << "\n\t----- View Employee ------" << endl;
     cout << "\n\t[1] View All Employees" << endl;
@@ -145,7 +162,7 @@ void viewEmployee() {
                     if (employees[i].id == searchId) {
                         cout << "\n\t----- Employee Details ------" << endl;
                         cout << "\n\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
-                        cout << "\t| " << left << setw(4) << "ID" << " | " << setw(20) << "Name" << " | " << setw(15) << "City Address" << " | " << setw(12) << "Department" << " | " << setw(12) << "Position" << " | " << setw(8) << "Rate" << " |" << endl;
+                        cout << "\t| " << left << setw(4) << "ID" << " | " << setw(20) << "Name" << " | " << setw(15) << "City Address" << " | " << setw(20) << "Department" << " | " << setw(12) << "Position" << " | " << setw(8) << "Rate" << " |" << endl;
                         cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
                         cout << "\t| " << left << setw(4) << employees[i].id << " | " << setw(20) << employees[i].fullName << " | " << setw(15) << employees[i].cityAddr << " | " << setw(12) << employees[i].department << " | " << setw(12) << employees[i].position << " | " << setw(8) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
                         cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
