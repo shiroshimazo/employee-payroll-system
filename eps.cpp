@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 using namespace std;
 
 void adminLogin(), staffLogin(), employeeLogin(), userAuthentication();
@@ -110,23 +111,26 @@ void updateEmployee() {
 
 void viewEmployee() {
     char choice;
+    cout << "\n\t----- View Employee ------" << endl;
     cout << "\n\t[1] View All Employees" << endl;
     cout << "\t[2] Search Employee by ID" << endl;
     cout << "\t[0] Back" << endl;
     cout << "\n\tChoice: ";
     cin >> choice;
     clrscrn();
-
-    switch() {
+    switch(choice) {
         case '1':
             cout << "\n\t----- All Employees ------" << endl;
-            for(int i = 0; i < employeeCount; i++) {
-                cout << "\n\tEmployee ID: " << employees[i].id << endl;
-                cout << "\tFull Name: " << employees[i].fullName << endl;
-                cout << "\tCity Address: " << employees[i].cityAddr << endl;
-                cout << "\tDepartment: " << employees[i].department << endl;
-                cout << "\tPosition: " << employees[i].position << endl;
-                cout << "\tRate: " << employees[i].rate << endl;
+            if (employeeCount == 0) {
+                cout << "\n\tNo employees found!" << endl;
+            } else {
+                cout << "\n\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
+                cout << "\t| " << left << setw(4) << "ID" << " | " << setw(20) << "Name" << " | " << setw(15) << "City Address" << " | " << setw(20) << "Department" << " | " << setw(12) << "Position" << " | " << setw(8) << "Rate" << " |" << endl;
+                cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
+                for (int i = 0; i < employeeCount; i++) {
+                    cout << "\t| " << left << setw(4) << employees[i].id << " | " << setw(20) << employees[i].fullName << " | " << setw(15) << employees[i].cityAddr << " | " << setw(12) << employees[i].department << " | " << setw(12) << employees[i].position << " | " << setw(8) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
+                }
+                cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
             }
             viewEmployee();
             break;
@@ -137,20 +141,19 @@ void viewEmployee() {
             clrscrn();
             {
                 bool found = false;
-                for(int i = 0; i < employeeCount; i++) {
-                    if(employees[i].id == searchId) {
+                for (int i = 0; i < employeeCount; i++) {
+                    if (employees[i].id == searchId) {
                         cout << "\n\t----- Employee Details ------" << endl;
-                        cout << "\n\tEmployee ID: " << employees[i].id << endl;
-                        cout << "\tFull Name: " << employees[i].fullName << endl;
-                        cout << "\tCity Address: " << employees[i].cityAddr << endl;
-                        cout << "\tDepartment: " << employees[i].department << endl;
-                        cout << "\tPosition: " << employees[i].position << endl;
-                        cout << "\tRate: " << employees[i].rate << endl;
+                        cout << "\n\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
+                        cout << "\t| " << left << setw(4) << "ID" << " | " << setw(20) << "Name" << " | " << setw(15) << "City Address" << " | " << setw(12) << "Department" << " | " << setw(12) << "Position" << " | " << setw(8) << "Rate" << " |" << endl;
+                        cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
+                        cout << "\t| " << left << setw(4) << employees[i].id << " | " << setw(20) << employees[i].fullName << " | " << setw(15) << employees[i].cityAddr << " | " << setw(12) << employees[i].department << " | " << setw(12) << employees[i].position << " | " << setw(8) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
+                        cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
                         found = true;
                         break;
                     }
                 }
-                if(!found) {
+                if (!found) {
                     cout << "\n\tEmployee ID not found!" << endl;
                 }
             }
