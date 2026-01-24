@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <fstream>
 using namespace std;
 
 void adminLogin(), staffLogin(), employeeLogin(), userAuthentication();
@@ -60,6 +61,7 @@ void employeeRec() {
 }
 
 void addEmployee() {
+    ofstream file("employees.txt", ios::app);
     cout << "\n\t----- Add New Employee ------" << endl;
     Employee newEmp;
     cout << "\n\tEnter Employee ID: ";
@@ -78,12 +80,12 @@ void addEmployee() {
 
     cout << "\n\tEmployee Added Successfully!" << endl;
 
-    cout << "\n\tEmployee ID:      " << newEmp.id << endl;
-    cout << "\tFull Name:        " << newEmp.fullName << endl;
-    cout << "\tCity Address:     " << newEmp.cityAddr << endl;
-    cout << "\tDepartment:       " << newEmp.department << endl;
-    cout << "\tPosition:         " << newEmp.position << endl;
-    cout << "\tRate:             " << newEmp.rate << endl;
+    file << "\n\tEmployee ID:      " << newEmp.id << endl;
+    file << "\tFull Name:        " << newEmp.fullName << endl;
+    file << "\tCity Address:     " << newEmp.cityAddr << endl;
+    file << "\tDepartment:       " << newEmp.department << endl;
+    file << "\tPosition:         " << newEmp.position << endl;
+    file << "\tRate:             " << newEmp.rate << endl;
 }
 
 void updateEmployee() {
