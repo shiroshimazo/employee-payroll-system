@@ -61,7 +61,7 @@ void employeeRec() {
 }
 
 void addEmployee() {
-    ofstream empRec("employees.txt", ios::app);
+    ofstream empRec("employees.txt");
     cout << "\n\t----- Add New Employee ------" << endl;
     Employee newEmp;
     cout << "\n\tEnter Employee ID: ";
@@ -92,18 +92,15 @@ void addEmployee() {
 
     cout << "\n\tEmployee Added Successfully!" << endl;
 
-    empRec << employeeCount << endl;
     for (int i = 0; i < employeeCount; i++) {
         empRec << employees[i].id << endl;
         empRec << employees[i].fullName << endl;
         empRec << employees[i].cityAddr << endl;
-        empRec  << employees[i].department << endl;
+        empRec << employees[i].department << endl;
         empRec << employees[i].position << endl;
         empRec << employees[i].rate << endl;
     }
     empRec.close();
-    
-
     employeeRec();
 }
 
