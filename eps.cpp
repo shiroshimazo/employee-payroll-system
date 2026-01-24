@@ -105,7 +105,116 @@ void addEmployee() {
 }
 
 void updateEmployee() {
+    cout << "\n\t----- Update Employee ------" << endl;
+    ifstream viewRec("employees.txt");
+    employeeCount = 0;
+    string line;
+    while(getline(viewRec, line)) {
+        employees[employeeCount].id = stoi(line);
+        getline(viewRec, employees[employeeCount].fullName);
+        getline(viewRec, employees[employeeCount].cityAddr);
+        getline(viewRec, employees[employeeCount].department);
+        getline(viewRec, employees[employeeCount].position);
+        getline(viewRec, line);
+        employees[employeeCount].rate = stod(line);
+        employeeCount++;
+    }
+    viewRec.close();
 
+    int updId;
+    cout << "\n\tEnter Employee ID to Update: ";
+    cin >> updId;
+    clrscrn();
+    bool found = false;
+    int idx = -1;
+    for (int i = 0; i < employeeCount; i++) {
+        if (employees[i].id == updId) {
+            found = true;
+            idx = i;
+            break;
+        }
+    }
+    if (!found) {
+        cout << "\n\tEmployee ID not found!" << endl;
+        employeeRec();
+        return;
+    }
+    // Show the employee in table format
+    cout << "\n\tEmployee to Update:" << endl;
+    cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
+    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\n\tWhat do you want to change?" << endl;
+    cout << "\t[1] Change Name" << endl;
+    cout << "\t[2] Change City" << endl;
+    cout << "\t[3] Change Department" << endl;
+    cout << "\t[4] Change Position" << endl;
+    cout << "\t[5] Change Rate" << endl;
+    cout << "\tChoice: ";
+    char choice;
+    cin >> choice;
+    clrscrn();
+    switch(choice) {
+        case '1': {
+            cout << "\n\tEnter new Name: ";
+            cin.ignore();
+            getline(cin, employees[idx].fullName);
+            cout << "\n\tName updated successfully!" << endl;
+            break;
+        }
+        case '2': {
+            cout << "\n\tEnter new City: ";
+            cin.ignore();
+            getline(cin, employees[idx].cityAddr);
+            cout << "\n\tCity updated successfully!" << endl;
+            break;
+        }
+        case '3': {
+            cout << "\n\tEnter new Department: ";
+            cin.ignore();
+            getline(cin, employees[idx].department);
+            cout << "\n\tDepartment updated successfully!" << endl;
+            break;
+        }
+        case '4': {
+            cout << "\n\tEnter new Position: ";
+            cin.ignore();
+            getline(cin, employees[idx].position);
+            cout << "\n\tPosition updated successfully!" << endl;
+            break;
+        }
+        case '5': {
+            cout << "\n\tEnter new Rate: ";
+            cin >> employees[idx].rate;
+            cout << "\n\tRate updated successfully!" << endl;
+            break;
+        }
+        default:
+            cout << "\n\tInvalid Choice!" << endl;
+            employeeRec();
+            return;
+    }
+    // Save changes
+    ofstream outRec("employees.txt");
+    for (int i = 0; i < employeeCount; i++) {
+        outRec << employees[i].id << endl;
+        outRec << employees[i].fullName << endl;
+        outRec << employees[i].cityAddr << endl;
+        outRec << employees[i].department << endl;
+        outRec << employees[i].position << endl;
+        outRec << employees[i].rate << endl;
+    }
+    outRec.close();
+    // Show updated row
+    cout << "\n\tUpdated Employee Data:" << endl;
+    cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
+    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    employeeRec();
 }
 
 void viewEmployee() {
@@ -185,7 +294,73 @@ void viewEmployee() {
 }
 
 void deleteEmployee() {
+    cout << "\n\t----- Delete Employee ------" << endl;
+    ifstream viewRec("employees.txt");
+    employeeCount = 0;
+    string line;
+    while(getline(viewRec, line)) {
+        employees[employeeCount].id = stoi(line);
+        getline(viewRec, employees[employeeCount].fullName);
+        getline(viewRec, employees[employeeCount].cityAddr);
+        getline(viewRec, employees[employeeCount].department);
+        getline(viewRec, employees[employeeCount].position);
+        getline(viewRec, line);
+        employees[employeeCount].rate = stod(line);
+        employeeCount++;
+    }
+    viewRec.close();
 
+    int delId;
+    cout << "\n\tEnter Employee ID to Delete: ";
+    cin >> delId;
+    clrscrn();
+    bool found = false;
+    int idx = -1;
+    for (int i = 0; i < employeeCount; i++) {
+        if (employees[i].id == delId) {
+            found = true;
+            idx = i;
+            break;
+        }
+    }
+    if (!found) {
+        cout << "\n\tEmployee ID not found!" << endl;
+        employeeRec();
+        return;
+    }
+    cout << "\n\tEmployee to Delete:" << endl;
+    cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
+    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\n\tAre you sure?" << endl;
+    cout << "\t[1] Delete Row of Data" << endl;
+    cout << "\t[2] Cancel" << endl;
+    cout << "\tChoice: ";
+    char choice;
+    cin >> choice;
+    clrscrn();
+    if (choice == '1') {
+        for (int i = idx; i < employeeCount - 1; i++) {
+            employees[i] = employees[i + 1];
+        }
+        employeeCount--;
+        ofstream outRec("employees.txt");
+        for (int i = 0; i < employeeCount; i++) {
+            outRec << employees[i].id << endl;
+            outRec << employees[i].fullName << endl;
+            outRec << employees[i].cityAddr << endl;
+            outRec << employees[i].department << endl;
+            outRec << employees[i].position << endl;
+            outRec << employees[i].rate << endl;
+        }
+        outRec.close();
+        cout << "\n\tEmployee deleted successfully!" << endl;
+    } else {
+        cout << "\n\tDeletion cancelled." << endl;
+    }
+    employeeRec();
 }
 
 void adminLogin() {
