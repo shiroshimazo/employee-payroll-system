@@ -80,6 +80,7 @@ void addEmployee() {
 
     cout << "\n\tEmployee Added Successfully!" << endl;
 
+    file << "\n\t----- Employee Information ------" << endl;
     file << "\n\tEmployee ID:      " << newEmp.id << endl;
     file << "\tFull Name:        " << newEmp.fullName << endl;
     file << "\tCity Address:     " << newEmp.cityAddr << endl;
