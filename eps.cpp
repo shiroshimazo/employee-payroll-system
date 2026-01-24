@@ -94,14 +94,12 @@ void addEmployee() {
 
     cout << "\n\tEmployee Added Successfully!" << endl;
 
-    for (int i = 0; i < employeeCount; i++) {
-        empRec << employees[i].id << endl;
-        empRec << employees[i].fullName << endl;
-        empRec << employees[i].cityAddr << endl;
-        empRec << employees[i].department << endl;
-        empRec << employees[i].position << endl;
-        empRec << employees[i].rate << endl;
-    }
+    empRec << newEmp.id << endl;
+    empRec << newEmp.fullName << endl;
+    empRec << newEmp.cityAddr << endl;
+    empRec << newEmp.department << endl;
+    empRec << newEmp.position << endl;
+    empRec << newEmp.rate << endl;
     empRec.close();
     employeeRec();
 }
@@ -112,21 +110,20 @@ void updateEmployee() {
 
 void viewEmployee() {
     ifstream viewRec("employees.txt");
-    string empInformation;
     employeeCount = 0;
-    if (viewRec.is_open()) {
-        while (viewRec >> employees[employeeCount].id) {
-            viewRec.ignore();
-            getline(viewRec, employees[employeeCount].fullName);
-            getline(viewRec, employees[employeeCount].cityAddr);
-            getline(viewRec, employees[employeeCount].department);
-            getline(viewRec, employees[employeeCount].position);
-            viewRec >> employees[employeeCount].rate;
-            viewRec.ignore();
-            employeeCount++;
-        }
-        viewRec.close();
+    string line;
+    while(getline(viewRec, line)) {
+        employees[employeeCount].id = stoi(line);
+        getline(viewRec, employees[employeeCount].fullName);
+        getline(viewRec, employees[employeeCount].cityAddr);
+        getline(viewRec, employees[employeeCount].department);
+        getline(viewRec, employees[employeeCount].position);
+        getline(viewRec, line);
+        employees[employeeCount].rate = stod(line);
+        employeeCount++;
     }
+    viewRec.close();
+    
     char choice;
     cout << "\n\t----- View Employee ------" << endl;
     cout << "\n\t[1] View All Employees" << endl;
@@ -135,19 +132,20 @@ void viewEmployee() {
     cout << "\n\tChoice: ";
     cin >> choice;
     clrscrn();
+    
     switch(choice) {
         case '1':
             cout << "\n\t----- All Employees ------" << endl;
             if (employeeCount == 0) {
                 cout << "\n\tNo employees found!" << endl;
             } else {
-                cout << "\n\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
-                cout << "\t| " << left << setw(4) << "ID" << " | " << setw(20) << "Name" << " | " << setw(15) << "City Address" << " | " << setw(20) << "Department" << " | " << setw(12) << "Position" << " | " << setw(8) << "Rate" << " |" << endl;
-                cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
+                cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+                cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+                cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
                 for (int i = 0; i < employeeCount; i++) {
-                    cout << "\t| " << left << setw(4) << employees[i].id << " | " << setw(20) << employees[i].fullName << " | " << setw(15) << employees[i].cityAddr << " | " << setw(12) << employees[i].department << " | " << setw(12) << employees[i].position << " | " << setw(8) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
+                    cout << "\t| " << left << setw(3) << employees[i].id << " | " << setw(13) << employees[i].fullName << " | " << setw(13) << employees[i].cityAddr << " | " << setw(18) << employees[i].department << " | " << setw(13) << employees[i].position << " | " << setw(6) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
                 }
-                cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
+                cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
             }
             viewEmployee();
             break;
@@ -161,11 +159,11 @@ void viewEmployee() {
                 for (int i = 0; i < employeeCount; i++) {
                     if (employees[i].id == searchId) {
                         cout << "\n\t----- Employee Details ------" << endl;
-                        cout << "\n\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
-                        cout << "\t| " << left << setw(4) << "ID" << " | " << setw(20) << "Name" << " | " << setw(15) << "City Address" << " | " << setw(20) << "Department" << " | " << setw(12) << "Position" << " | " << setw(8) << "Rate" << " |" << endl;
-                        cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
-                        cout << "\t| " << left << setw(4) << employees[i].id << " | " << setw(20) << employees[i].fullName << " | " << setw(15) << employees[i].cityAddr << " | " << setw(12) << employees[i].department << " | " << setw(12) << employees[i].position << " | " << setw(8) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
-                        cout << "\t+------+----------------------+-----------------+--------------+--------------+----------+" << endl;
+                        cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+                        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+                        cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+                        cout << "\t| " << left << setw(3) << employees[i].id << " | " << setw(13) << employees[i].fullName << " | " << setw(13) << employees[i].cityAddr << " | " << setw(18) << employees[i].department << " | " << setw(13) << employees[i].position << " | " << setw(6) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
+                        cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
                         found = true;
                         break;
                     }
