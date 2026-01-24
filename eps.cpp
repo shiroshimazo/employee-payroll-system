@@ -139,7 +139,6 @@ void updateEmployee() {
         employeeRec();
         return;
     }
-    // Show the employee in table format
     cout << "\n\tEmployee to Update:" << endl;
     cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
     cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
@@ -196,7 +195,6 @@ void updateEmployee() {
             employeeRec();
             return;
     }
-    // Save changes
     ofstream outRec("employees.txt");
     for (int i = 0; i < employeeCount; i++) {
         outRec << employees[i].id << endl;
@@ -207,7 +205,6 @@ void updateEmployee() {
         outRec << employees[i].rate << endl;
     }
     outRec.close();
-    // Show updated row
     cout << "\n\tUpdated Employee Data:" << endl;
     cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
     cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
