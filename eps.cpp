@@ -66,6 +66,15 @@ void addEmployee() {
     Employee newEmp;
     cout << "\n\tEnter Employee ID: ";
     cin >> newEmp.id;
+
+    for (int i = 0; i < employeeCount; i++) {
+        if (employees[i].id == newEmp.id) {
+            cout << "\n\tEmployee ID already exists! Please try again." << endl;
+            employeeRec();
+            return;
+        }
+    }
+
     cout << "\n\tEnter Full Name: ";
     cin.ignore();
     getline(cin, newEmp.fullName);
@@ -78,15 +87,23 @@ void addEmployee() {
     cout << "\n\tEnter Rate: ";
     cin >> newEmp.rate;
 
+    employees[employeeCount] = newEmp;
+    employeeCount++;
+
     cout << "\n\tEmployee Added Successfully!" << endl;
 
-    file << "\n\t----- Employee Information ------" << endl;
-    file << "\n\tEmployee ID:      " << newEmp.id << endl;
-    file << "\tFull Name:        " << newEmp.fullName << endl;
-    file << "\tCity Address:     " << newEmp.cityAddr << endl;
-    file << "\tDepartment:       " << newEmp.department << endl;
-    file << "\tPosition:         " << newEmp.position << endl;
-    file << "\tRate:             " << newEmp.rate << endl;
+    file << employeeCount << endl;
+    for (int i = 0; i < employeeCount; i++) {
+        file << employees[i].id << endl;
+        file << employees[i].fullName << endl;
+        file << employees[i].cityAddr << endl;
+        file << employees[i].department << endl;
+        file << employees[i].position << endl;
+        file << employees[i].rate << endl;
+    }
+    file.close();
+
+    employeeRec();
 }
 
 void updateEmployee() {
