@@ -5,7 +5,7 @@
 using namespace std;
 
 void adminLogin(), staffLogin(), employeeLogin(), userAuthentication();
-void employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
+void readDataEmployees(), employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
 void clrscrn();
 
 struct Employee {
@@ -23,6 +23,23 @@ int employeeCount = 0;
 int main() {
     userAuthentication();
     return 0;
+}
+
+void readDataEmployees() {
+    ifstream readEmp("employees.txt");
+    employeeCount = 0;
+    string line;
+    while(getline(readEmp, line)) {
+        employees[employeeCount].id = stoi(line);
+        getline(readEmp, employees[employeeCount].fullName);
+        getline(readEmp, employees[employeeCount].cityAddr);
+        getline(readEmp, employees[employeeCount].department);
+        getline(readEmp, employees[employeeCount].position);
+        getline(readEmp, line);
+        employees[employeeCount].rate = stod(line);
+        employeeCount++;
+    }
+    readEmp.close(); 
 }
 
 void employeeRec() {
@@ -106,21 +123,7 @@ void addEmployee() {
 
 void updateEmployee() {
     cout << "\n\t----- Update Employee ------" << endl;
-    ifstream viewRec("employees.txt");
-    employeeCount = 0;
-    string line;
-    while(getline(viewRec, line)) {
-        employees[employeeCount].id = stoi(line);
-        getline(viewRec, employees[employeeCount].fullName);
-        getline(viewRec, employees[employeeCount].cityAddr);
-        getline(viewRec, employees[employeeCount].department);
-        getline(viewRec, employees[employeeCount].position);
-        getline(viewRec, line);
-        employees[employeeCount].rate = stod(line);
-        employeeCount++;
-    }
-    viewRec.close();
-
+    readDataEmployees();
     int updId;
     cout << "\n\tEnter Employee ID to Update: ";
     cin >> updId;
@@ -215,21 +218,7 @@ void updateEmployee() {
 }
 
 void viewEmployee() {
-    ifstream viewRec("employees.txt");
-    employeeCount = 0;
-    string line;
-    while(getline(viewRec, line)) {
-        employees[employeeCount].id = stoi(line);
-        getline(viewRec, employees[employeeCount].fullName);
-        getline(viewRec, employees[employeeCount].cityAddr);
-        getline(viewRec, employees[employeeCount].department);
-        getline(viewRec, employees[employeeCount].position);
-        getline(viewRec, line);
-        employees[employeeCount].rate = stod(line);
-        employeeCount++;
-    }
-    viewRec.close();
-    
+    readDataEmployees();
     char choice;
     cout << "\n\t----- View Employee ------" << endl;
     cout << "\n\t[1] View All Employees" << endl;
@@ -292,21 +281,7 @@ void viewEmployee() {
 
 void deleteEmployee() {
     cout << "\n\t----- Delete Employee ------" << endl;
-    ifstream viewRec("employees.txt");
-    employeeCount = 0;
-    string line;
-    while(getline(viewRec, line)) {
-        employees[employeeCount].id = stoi(line);
-        getline(viewRec, employees[employeeCount].fullName);
-        getline(viewRec, employees[employeeCount].cityAddr);
-        getline(viewRec, employees[employeeCount].department);
-        getline(viewRec, employees[employeeCount].position);
-        getline(viewRec, line);
-        employees[employeeCount].rate = stod(line);
-        employeeCount++;
-    }
-    viewRec.close();
-
+    readDataEmployees();
     int delId;
     cout << "\n\tEnter Employee ID to Delete: ";
     cin >> delId;
