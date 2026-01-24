@@ -100,8 +100,9 @@ void addEmployee() {
         file << employees[i].department << endl;
         file << employees[i].position << endl;
         file << employees[i].rate << endl;
+        file.close();
     }
-    file.close();
+    
 
     employeeRec();
 }
