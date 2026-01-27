@@ -6,7 +6,7 @@ using namespace std;
 
 void adminMenu(), staffMenu(), employeeMenu(), userAuthentication();
 void readDataEmployees(), employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
-void readDataStaffs(), staffRec(), addStaff(), updateStaff(), viewStaff(), deleteStaff();
+void readDataStaffs(), staffsRec(), addStaff(), updateStaff(), viewStaff(), deleteStaff();
 void clrscrn();
 
 struct Employee {
@@ -24,8 +24,7 @@ struct Staff {
     string password;
     string fullName;
     string cityAddr;
-    string department;
-    string position;
+    string role;
     double rate;
 };
 
@@ -350,7 +349,7 @@ void deleteEmployee() {
     employeeRec();
 }
 
-void staffRec() {
+void staffsRec() {
     cout << "\n\t----- Staff Records Management ------" << endl;
     cout << "\n\t[1] Add Staff" << endl;
     cout << "\t[2] Update Staff" << endl;
@@ -381,13 +380,56 @@ void staffRec() {
             break;
         default:
             cout << "\n\tInvalid Choice! Please Try Again." << endl;
-            staffRec();
+            staffsRec();
             break;
     }
 }
 
 void addStaff() {
-    
+    fstream staffRec;
+    staffRec.open("staffs.txt", ios::app);
+    cout << "\n\t----- Add New Staff ------" << endl;
+    Staff newStaff;
+    cout << "\n\tEnter Staff ID: ";
+    cin >> newStaff.id;
+
+    for (int i = 0; i < staffCount; i++) {
+        if (staffs[i].id == newStaff.id) {
+            cout << "\n\tStaff ID already exists! Please try again." << endl;
+            staffsRec();
+            return;
+        }
+    }
+
+    cout << "\n\tEnter Username: ";
+    cin.ignore();
+    getline(cin, newStaff.username);
+    cout << "\n\tEnter Password: ";
+    getline(cin, newStaff.password);
+    cout << "\n\tEnter Full Name: ";
+    cin.ignore();
+    getline(cin, newStaff.fullName);
+    cout << "\n\tEnter City Address: ";
+    getline(cin, newStaff.cityAddr);
+    cout << "\n\tEnter Role: ";
+    cin >> newStaff.role;
+    cout << "\n\tEnter Rate: ";
+    cin >> newStaff.rate;
+
+    staffs[staffCount] = newStaff;
+    staffCount++;
+
+    cout << "\n\tEmployee Added Successfully!" << endl;
+
+    staffRec << newStaff.id << endl;
+    staffRec << newStaff.username << endl;
+    staffRec << newStaff.password << endl;
+    staffRec << newStaff.fullName << endl;
+    staffRec << newStaff.cityAddr << endl;
+    staffRec << newStaff.role << endl;
+    staffRec << newStaff.rate << endl;
+    staffRec.close();
+    staffsRec();
 }
 
 void updateStaff() {
@@ -419,7 +461,7 @@ void adminMenu() {
             employeeRec();
             break;
         case '2':
-            
+            staffsRec();
             break;
         case '3':
             
