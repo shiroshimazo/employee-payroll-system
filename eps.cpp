@@ -55,6 +55,24 @@ void readDataEmployees() {
     readEmp.close(); 
 }
 
+void readDataStaff() {
+    ifstream readStaff("staffs.txt");
+    staffCount = 0;
+    string line;
+    while(getline(readStaff, line)) {
+        staffs[staffCount].id = stoi(line);
+        getline(readStaff, staffs[staffCount].username);
+        getline(readStaff, staffs[staffCount].password);
+        getline(readStaff, staffs[staffCount].fullName);
+        getline(readStaff, staffs[staffCount].cityAddr);
+        getline(readStaff, staffs[staffCount].role);
+        getline(readStaff, line);
+        staffs[staffCount].rate = stod(line);
+        staffCount++;
+    }
+    readStaff.close();
+}
+
 void employeeRec() {
     cout << "\n\t----- Employee Records Management ------" << endl;
     cout << "\n\t[1] Add Employee" << endl;
@@ -412,7 +430,8 @@ void addStaff() {
     cout << "\n\tEnter City Address: ";
     getline(cin, newStaff.cityAddr);
     cout << "\n\tEnter Role: ";
-    cin >> newStaff.role;
+    cin.ignore();
+    getline(cin, newStaff.role);
     cout << "\n\tEnter Rate: ";
     cin >> newStaff.rate;
 
@@ -432,11 +451,69 @@ void addStaff() {
     staffsRec();
 }
 
-void updateStaff() {
+void viewStaff() {
+    readDataStaff();
+    char choice;
+    cout << "\n\t----- View Staff ------" << endl;
+    cout << "\n\t[1] View All Staffs" << endl;
+    cout << "\t[2] Search Staffs by ID" << endl;
+    cout << "\t[0] Back" << endl;
+    cout << "\n\tChoice: ";
+    cin >> choice;
+    clrscrn();
     
+    switch(choice) {
+        case '1':
+            cout << "\n\t----- All Staffs ------" << endl;
+            if (staffCount == 0) {
+                cout << "\n\tNo staffs found!" << endl;
+            } else {
+                cout << "\n\t+-----+---------------+---------------+--------------------+--------+" << endl;
+                cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(13) << "Full Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
+                cout << "\t+-----+---------------+---------------+--------------------+--------+" << endl;
+                for (int i = 0; i < staffCount; i++) {
+                    cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << staffs[i].password << " | " << setw(13) << staffs[i].fullName << " | " << setw(13) << staffs[i].cityAddr << " | " << setw(18) << staffs[i].role << " | " << setw(6) << fixed << setprecision(2) << staffs[i].rate << " |" << endl;
+                }
+                cout << "\t+-----+---------------+---------------+--------------------+--------+" << endl;
+            }
+            viewStaff();
+            break;
+        case '2':
+            int searchId;
+            cout << "\n\tEnter Staff ID to Search: ";
+            cin >> searchId;
+            clrscrn();
+            {
+                bool found = false;
+                for (int i = 0; i < staffCount; i++) {
+                    if (staffs[i].id == searchId) {
+                        cout << "\n\t----- Staff Details ------" << endl;
+                        cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+                        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(13) << "Full Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
+                        cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+                        cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << staffs[i].password << " | " << setw(13) << staffs[i].fullName << " | " << setw(13) << staffs[i].cityAddr << " | " << setw(18) << staffs[i].role << " | " << setw(6) << fixed << setprecision(2) << staffs[i].rate << " |" << endl;
+                        cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    cout << "\n\tStaff ID not found!" << endl;
+                }
+            }
+            viewStaff();
+            break;
+        case '0':
+            staffsRec();
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            viewStaff();
+            break;
+    }
 }
 
-void viewStaff() {
+void updateStaff() {
     
 }
 
