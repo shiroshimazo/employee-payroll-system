@@ -1,7 +1,7 @@
-#include <iostream>
 #include <cstdlib>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 using namespace std;
 
 void adminMenu(), staffMenu(), employeeMenu(), userAuthentication();
@@ -59,7 +59,7 @@ void readDataStaff() {
     ifstream readStaff("staffs.txt");
     staffCount = 0;
     string line;
-    while(getline(readStaff, line)) {
+    while (getline(readStaff, line)) {
         staffs[staffCount].id = stoi(line);
         getline(readStaff, staffs[staffCount].username);
         getline(readStaff, staffs[staffCount].password);
@@ -86,7 +86,7 @@ void employeeRec() {
 
     clrscrn();
 
-    switch(choice) {
+    switch (choice) {
         case '1':
             addEmployee();
             break;
@@ -110,20 +110,26 @@ void employeeRec() {
 }
 
 void addEmployee() {
+    readDataEmployees();
     fstream empRec;
     empRec.open("employees.txt", ios::app);
+    bool idExists;
     cout << "\n\t----- Add New Employee ------" << endl;
     Employee newEmp;
-    cout << "\n\tEnter Employee ID: ";
-    cin >> newEmp.id;
 
-    for (int i = 0; i < employeeCount; i++) {
-        if (employees[i].id == newEmp.id) {
-            cout << "\n\tEmployee ID already exists! Please try again." << endl;
-            employeeRec();
-            return;
+    do {
+        idExists = false;
+        cout << "\n\tEnter Employee ID: ";
+        cin >> newEmp.id;
+
+        for (int i = 0; i < employeeCount; i++) {
+            if (employees[i].id == newEmp.id) {
+                cout << "\n\tEmployee ID already exists! Please try again." << endl;
+                idExists = true;
+                break;
+            }
         }
-    }
+    } while (idExists);
 
     cout << "\n\tEnter Full Name: ";
     cin.ignore();
@@ -189,7 +195,7 @@ void updateEmployee() {
     char choice;
     cin >> choice;
     clrscrn();
-    switch(choice) {
+    switch (choice) {
         case '1': {
             cout << "\n\tEnter new Name: ";
             cin.ignore();
@@ -404,20 +410,25 @@ void staffsRec() {
 }
 
 void addStaff() {
+    readDataStaff();
     fstream staffRec;
     staffRec.open("staffs.txt", ios::app);
+    bool idExists;
     cout << "\n\t----- Add New Staff ------" << endl;
     Staff newStaff;
-    cout << "\n\tEnter Staff ID: ";
-    cin >> newStaff.id;
+    do {
+        idExists = false;
+        cout << "\n\tEnter Staff ID: ";
+        cin >> newStaff.id;
 
-    for (int i = 0; i < staffCount; i++) {
-        if (staffs[i].id == newStaff.id) {
-            cout << "\n\tStaff ID already exists! Please try again." << endl;
-            staffsRec();
-            return;
+        for (int i = 0; i < staffCount; i++) {
+            if (staffs[i].id == newStaff.id) {
+                cout << "\n\tStaff ID already exists! Please try again." << endl;
+                idExists = true;
+                break;
+            }
         }
-    }
+    } while (idExists);
 
     cout << "\n\tEnter Username: ";
     cin.ignore();
@@ -425,12 +436,10 @@ void addStaff() {
     cout << "\n\tEnter Password: ";
     getline(cin, newStaff.password);
     cout << "\n\tEnter Full Name: ";
-    cin.ignore();
     getline(cin, newStaff.fullName);
     cout << "\n\tEnter City Address: ";
     getline(cin, newStaff.cityAddr);
     cout << "\n\tEnter Role: ";
-    cin.ignore();
     getline(cin, newStaff.role);
     cout << "\n\tEnter Rate: ";
     cin >> newStaff.rate;
@@ -468,13 +477,13 @@ void viewStaff() {
             if (staffCount == 0) {
                 cout << "\n\tNo staffs found!" << endl;
             } else {
-                cout << "\n\t+-----+---------------+---------------+--------------------+--------+" << endl;
-                cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(13) << "Full Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
-                cout << "\t+-----+---------------+---------------+--------------------+--------+" << endl;
+                cout << "\n\t+-----+---------------+---------------+----------------------+---------------+------------+--------+" << endl;
+                cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(13) << "City" << " | " << setw(10) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
+                cout << "\t+-----+---------------+---------------+----------------------+---------------+------------+--------+" << endl;
                 for (int i = 0; i < staffCount; i++) {
-                    cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << staffs[i].password << " | " << setw(13) << staffs[i].fullName << " | " << setw(13) << staffs[i].cityAddr << " | " << setw(18) << staffs[i].role << " | " << setw(6) << fixed << setprecision(2) << staffs[i].rate << " |" << endl;
+                    cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << staffs[i].password << " | " << setw(20) << staffs[i].fullName << " | " << setw(13) << staffs[i].cityAddr << " | " << setw(10) << staffs[i].role << " | " << setw(6) << fixed << setprecision(2) << staffs[i].rate << " |" << endl;
                 }
-                cout << "\t+-----+---------------+---------------+--------------------+--------+" << endl;
+                cout << "\t+-----+---------------+---------------+----------------------+---------------+------------+--------+" << endl;
             }
             viewStaff();
             break;
@@ -488,11 +497,11 @@ void viewStaff() {
                 for (int i = 0; i < staffCount; i++) {
                     if (staffs[i].id == searchId) {
                         cout << "\n\t----- Staff Details ------" << endl;
-                        cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-                        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(13) << "Full Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
-                        cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-                        cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << staffs[i].password << " | " << setw(13) << staffs[i].fullName << " | " << setw(13) << staffs[i].cityAddr << " | " << setw(18) << staffs[i].role << " | " << setw(6) << fixed << setprecision(2) << staffs[i].rate << " |" << endl;
-                        cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+                        cout << "\n\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+                        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(13) << "City" << " | " << setw(15) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
+                        cout << "\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+                        cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << staffs[i].password << " | " << setw(20) << staffs[i].fullName << " | " << setw(13) << staffs[i].cityAddr << " | " << setw(15) << staffs[i].role << " | " << setw(6) << fixed << setprecision(2) << staffs[i].rate << " |" << endl;
+                        cout << "\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
                         found = true;
                         break;
                     }

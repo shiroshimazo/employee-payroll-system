@@ -1,14 +1,21 @@
-101
-user1
-user123
-dam Hisona
+102
+user2
+user2
+User1
 Quezon City
-Payroll
+HR
 120
 101
 user1
-user123
-oan Kyle Galera
+user1
+user1
+Novaliches
+Payroll
+120
+103
+user3
+user3
+user3
 Bulacan
-R
+HR
 120
