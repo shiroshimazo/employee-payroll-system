@@ -4,8 +4,9 @@
 #include <iomanip>
 using namespace std;
 
-void adminLogin(), staffLogin(), employeeLogin(), userAuthentication();
+void adminMenu(), staffMenu(), employeeMenu(), userAuthentication();
 void readDataEmployees(), employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
+void readDataStaffs(), staffRec(), addStaff(), updateStaff(), viewStaff(), deleteStaff();
 void clrscrn();
 
 struct Employee {
@@ -17,8 +18,21 @@ struct Employee {
     double rate;
 };
 
+struct Staff {
+    int id;
+    string username;
+    string password;
+    string fullName;
+    string cityAddr;
+    string department;
+    string position;
+    double rate;
+};
+
 Employee employees[100];
+Staff staffs[100];
 int employeeCount = 0;
+int staffCount = 0;
 
 int main() {
     userAuthentication();
@@ -69,7 +83,7 @@ void employeeRec() {
             deleteEmployee();
             break;
         case '0':
-            adminLogin();
+            adminMenu();
             break;
         default:
             cout << "\n\tInvalid Choice! Please Try Again." << endl;
@@ -336,7 +350,59 @@ void deleteEmployee() {
     employeeRec();
 }
 
-void adminLogin() {
+void staffRec() {
+    cout << "\n\t----- Staff Records Management ------" << endl;
+    cout << "\n\t[1] Add Staff" << endl;
+    cout << "\t[2] Update Staff" << endl;
+    cout << "\t[3] View Staff" << endl;
+    cout << "\t[4] Delete Staff" << endl;
+    cout << "\t[0] Back" << endl;
+    cout << "\n\tChoice: ";
+    char choice;
+    cin >> choice;
+
+    clrscrn();
+
+    switch(choice) {
+        case '1':
+            addStaff();
+            break;
+        case '2':
+            updateStaff();
+            break;
+        case '3':
+            viewStaff();
+            break;
+        case '4':
+            deleteStaff();
+            break;
+        case '0':
+            adminMenu();
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            staffRec();
+            break;
+    }
+}
+
+void addStaff() {
+    
+}
+
+void updateStaff() {
+    
+}
+
+void viewStaff() {
+    
+}
+
+void deleteStaff() {
+    
+}
+
+void adminMenu() {
     cout << "\n\t----- Admin Dashboard ------" << endl;
     cout << "\n\t[1] Manage Employee Records" << endl;
     cout << "\t[2] Manage Staff Accounts" << endl;
@@ -368,7 +434,7 @@ void adminLogin() {
                     userAuthentication();
                     break;
                 } else if(confirm == 'n' || confirm == 'N') {
-                    adminLogin();
+                    adminMenu();
                     break;
                 } else {
                     cout << "\n\tInvalid input! Please Try Again." << endl;
@@ -377,16 +443,16 @@ void adminLogin() {
             break;
         default:
             cout << "\n\tInvalid Choice! Please Try Again." << endl;
-            adminLogin();
+            adminMenu();
             break;
     }
 }
 
-void staffLogin() {
+void staffMenu() {
 
 }
 
-void employeeLogin() {
+void employeeMenu() {
 
 }
 
@@ -406,15 +472,15 @@ void userAuthentication() {
 
         if(username == "admin" && password == "admin123") {
             cout << "\n\tLogin Successful! Welcome Admin." << endl;
-            adminLogin();
+            adminMenu();
             break;
         } else if(username == "staff" && password == "staff123") {
             cout << "\n\tLogin Successful! Welcome Staff." << endl;
-            staffLogin();
+            staffMenu();
             break;
         } else if(username == "employee" && password == "emp123") {
             cout << "\n\tLogin Successful! Welcome Employee." << endl;
-            employeeLogin();
+            employeeMenu();
             break;
         } else {
             cout << "\n\tInvalid Credentials! Please try again." << endl;
