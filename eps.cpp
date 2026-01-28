@@ -231,7 +231,7 @@ void updateEmployee() {
             break;
         }
         default:
-            cout << "\n\tInvalid Choice!" << endl;
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
             employeeRec();
             return;
     }
@@ -523,7 +523,105 @@ void viewStaff() {
 }
 
 void updateStaff() {
-    
+    cout << "\n\t----- Update Staff ------" << endl;
+    readDataStaff();
+    int updId;
+    cout << "\n\tEnter Staff ID to Update: ";
+    cin >> updId;
+    clrscrn();
+    bool found = false;
+    int idx = -1;
+    for (int i = 0; i < staffCount; i++) {
+        if (staffs[i].id == updId) {
+            found = true;
+            idx = i;
+            break;
+        }
+    }
+    if (!found) {
+        cout << "\n\tStaff ID not found!" << endl;
+        updateStaff();
+        return;
+    }
+    cout << "\n\tEmployee to Update:" << endl;
+    cout << "\n\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(13) << "City" << " | " << setw(15) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
+    cout << "\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].username << " | " << setw(13) << staffs[idx].password << " | " << setw(20) << staffs[idx].fullName << " | " << setw(13) << staffs[idx].cityAddr << " | " << setw(15) << staffs[idx].role << " | " << setw(6) << fixed << setprecision(2) << staffs[idx].rate << " |" << endl;
+    cout << "\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+    cout << "\n\tWhat do you want to change?" << endl;
+    cout << "\t[1] change Username" << endl;
+    cout << "\t[2] change Password" << endl;
+    cout << "\t[3] change Full Name" << endl;
+    cout << "\t[4] change City" << endl;
+    cout << "\t[5] change Role" << endl;
+    cout << "\t[6] change Rate" << endl;
+    cout << "\t[0] Back" << endl;
+    cout << "\n\tChoice: ";
+    char choice;
+    cin >> choice;
+    clrscrn();
+    switch(choice) {
+        case '1':
+            cout << "\n\tEnter New Username: ";
+            cin >> staffs[idx].username;
+            cout << "\n\tUsername updated successfully!" << endl;
+            break;
+        case '2':
+            cout << "\n\tEnter New Password: ";
+            cin >> staffs[idx].password;
+            cout << "\n\tPassword updated successfully!" << endl;
+            break;
+        case '3':
+            cout << "\n\tEnter New Full Name: ";
+            cin.ignore();
+            getline(cin, staffs[idx].fullName); 
+            cout << "\n\tFull Name updated successfully!" << endl;
+            break;
+        case '4':
+            cout << "\n\tEnter New City: ";
+            cin.ignore();
+            getline(cin, staffs[idx].cityAddr);
+            cout << "\n\tCity updated successfully!" << endl;
+            break;
+        case '5':
+            cout << "\n\tEnter New Role: ";
+            cin.ignore();
+            getline(cin, staffs[idx].role);
+            cout << "\n\tRole updated successfully!" << endl;
+            break;
+        case '6':
+            cout << "\n\tEnter New Rate: ";
+            cin >> staffs[idx].rate;
+            cout << "\n\tRate updated successfully!" << endl;
+            break;
+        case '0':
+            staffsRec();
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            updateStaff();
+            return;
+    }
+    ofstream outStaff("staffs.txt");
+    for(int i = 0; i < staffCount; i++) {
+        outStaff << staffs[i].id << "\n";
+        outStaff << staffs[i].username << "\n";
+        outStaff << staffs[i].password << "\n";
+        outStaff << staffs[i].fullName << "\n";
+        outStaff << staffs[i].cityAddr << "\n";
+        outStaff << staffs[i].role << "\n";
+        outStaff << staffs[i].rate << "\n";
+    }
+
+    outStaff.close();
+    cout << "\n\tUpdated Staff Data:" << endl;
+    cout << "\n\t+-----+---------------+---------------+----------------------+---------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(20) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
+    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].fullName << " | " << setw(13) << staffs[idx].cityAddr << " | " << setw(20) << staffs[idx].role << " | " << setw(6) << fixed << setprecision(2) << staffs[idx].rate << " |" << endl;
+    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    updateStaff();
 }
 
 void deleteStaff() {
