@@ -5,13 +5,6 @@ User1
 Quezon City
 HR
 120
-101
-user1
-user1
-user1
-Novaliches
-Payroll
-120
 103
 user3
 user3

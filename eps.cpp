@@ -34,7 +34,7 @@ int employeeCount = 0;
 int staffCount = 0;
 
 int main() {
-    mainMenu();
+    userAuthentication();
     return 0;
 }
 
@@ -385,7 +385,7 @@ void deleteEmployee() {
         outRec.close();
         cout << "\n\tEmployee deleted successfully!" << endl;
     } else {
-        cout << "\n\tDeletion cancelled." << endl;
+        cout << "\n\tDeletion cancelled!" << endl;
     }
     employeeRec();
 }
@@ -657,16 +657,70 @@ void updateStaff() {
 
     outStaff.close();
     cout << "\n\tUpdated Staff Data:" << endl;
-    cout << "\n\t+-----+---------------+---------------+----------------------+---------------+--------+" << endl;
-    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(20) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
-    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-    cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].fullName << " | " << setw(13) << staffs[idx].cityAddr << " | " << setw(20) << staffs[idx].role << " | " << setw(6) << fixed << setprecision(2) << staffs[idx].rate << " |" << endl;
-    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+    cout << "\n\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(13) << "City" << " | " << setw(15) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
+    cout << "\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].username << " | " << setw(13) << staffs[idx].password << " | " << setw(20) << staffs[idx].fullName << " | " << setw(13) << staffs[idx].cityAddr << " | " << setw(15) << staffs[idx].role << " | " << setw(6) << fixed << setprecision(2) << staffs[idx].rate << " |" << endl;
+    cout << "\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
     updateStaff();
 }
 
 void deleteStaff() {
-    
+    cout << "\n\t-------------------------------\n";
+    cout << "\t|   D E L E T E   S T A F F   |\n";
+    cout << "\t-------------------------------\n";
+    readDataStaff();
+    int delId;
+    cout << "\n\tEnter ID to delete: ";
+    cin >> delId;
+    clrscrn();
+    bool found = false;
+    int idx = -1;
+    for(int i = 0; i < staffCount; i++) {
+        if(staffs[i].id == delId) {
+            found = true;
+            idx = i;
+            break;
+        }
+    }
+    if(!found) {
+        cout << "\n\tStaff not found!" << endl;
+        return;
+    }
+    cout << "\n\tStaff to delete:" << endl;
+    cout << "\n\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(13) << "City" << " | " << setw(15) << "Role" << " | " << setw(6) << "Rate" << " |" << endl;
+    cout << "\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+    cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].username << " | " << setw(13) << staffs[idx].password << " | " << setw(20) << staffs[idx].fullName << " | " << setw(13) << staffs[idx].cityAddr << " | " << setw(15) << staffs[idx].role << " | " << setw(6) << fixed << setprecision(2) << staffs[idx].rate << " |" << endl;
+    cout << "\t+-----+---------------+---------------+----------------------+---------------+-----------------+--------+" << endl;
+    cout << "\n\tAre you sure?" << endl;
+    cout << "\t[1] Delete Row of Data" << endl;
+    cout << "\t[2] Cancel" << endl;
+    cout << "\tChoice: ";
+    char choice;
+    cin >> choice;
+    clrscrn();
+    if (choice == '1') {
+        for (int i = idx; i < staffCount - 1; i++) {
+            staffs[i] = staffs[i + 1];
+        }
+        staffCount--;
+        ofstream outStaff("staffs.txt");
+        for(int i = 0; i < staffCount; i++) {
+            outStaff << staffs[i].id << "\n";
+            outStaff << staffs[i].username << "\n";
+            outStaff << staffs[i].password << "\n";
+            outStaff << staffs[i].fullName << "\n";
+            outStaff << staffs[i].cityAddr << "\n";
+            outStaff << staffs[i].role << "\n";
+            outStaff << staffs[i].rate << "\n";
+        }
+        outStaff.close();
+        cout << "\n\tStaff deleted successfully!" << endl;
+    } else {
+        cout << "\n\tDeletion cancelled!" << endl;
+    }
+    deleteStaff();
 }
 
 void adminMenu() {
