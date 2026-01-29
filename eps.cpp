@@ -34,7 +34,7 @@ int employeeCount = 0;
 int staffCount = 0;
 
 int main() {
-    userAuthentication();
+    mainMenu();
     return 0;
 }
 
@@ -74,7 +74,9 @@ void readDataStaff() {
 }
 
 void employeeRec() {
-    cout << "\n\t----- Employee Records Management ------" << endl;
+    cout << "\n\t--------------------------------------" << endl;
+    cout << "\t|   E M P L O Y E E   R E C O R D S  |" << endl;
+    cout << "\t--------------------------------------" << endl;
     cout << "\n\t[1] Add Employee" << endl;
     cout << "\t[2] Update Employee" << endl;
     cout << "\t[3] View Employee" << endl;
@@ -114,7 +116,9 @@ void addEmployee() {
     fstream empRec;
     empRec.open("employees.txt", ios::app);
     bool idExists;
-    cout << "\n\t----- Add New Employee ------" << endl;
+    cout << "\n\t-----------------------------\n";
+    cout << "\t|   A D D  E M P L O Y E E  |\n";
+    cout << "\t-----------------------------\n";
     Employee newEmp;
 
     do {
@@ -159,7 +163,9 @@ void addEmployee() {
 }
 
 void updateEmployee() {
-    cout << "\n\t----- Update Employee ------" << endl;
+    cout << "\n\t-------------------------------------\n";
+    cout << "\t|   U P D A T E   E M P L O Y E E   |\n";
+    cout << "\t-------------------------------------\n";
     readDataEmployees();
     int updId;
     cout << "\n\tEnter Employee ID to Update: ";
@@ -176,64 +182,72 @@ void updateEmployee() {
     }
     if (!found) {
         cout << "\n\tEmployee ID not found!" << endl;
-        employeeRec();
-        return;
+        updateEmployee();
     }
-    cout << "\n\tEmployee to Update:" << endl;
-    cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
-    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-    cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
-    cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-    cout << "\n\tWhat do you want to change?" << endl;
-    cout << "\t[1] Change Name" << endl;
-    cout << "\t[2] Change City" << endl;
-    cout << "\t[3] Change Department" << endl;
-    cout << "\t[4] Change Position" << endl;
-    cout << "\t[5] Change Rate" << endl;
-    cout << "\tChoice: ";
-    char choice;
-    cin >> choice;
-    clrscrn();
-    switch (choice) {
-        case '1': {
+    bool showError = false;
+    while (true) {
+        clrscrn();
+        cout << "\n\tEmployee to Update:" << endl;
+        cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+        cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+        cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
+        cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
+        if (showError) {
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            showError = false;
+        }
+        cout << "\n\tWhat do you want to change?" << endl;
+        cout << "\t[1] Change Name" << endl;
+        cout << "\t[2] Change City" << endl;
+        cout << "\t[3] Change Department" << endl;
+        cout << "\t[4] Change Position" << endl;
+        cout << "\t[5] Change Rate" << endl;
+        cout << "\t[0] Back" << endl;
+        cout << "\tChoice: ";
+        char choice;
+        cin >> choice;
+        bool validUpdate = true;
+        switch (choice) {
+            case '1':
             cout << "\n\tEnter new Name: ";
             cin.ignore();
             getline(cin, employees[idx].fullName);
             cout << "\n\tName updated successfully!" << endl;
+            validUpdate = true;
             break;
-        }
-        case '2': {
+        case '2':
             cout << "\n\tEnter new City: ";
             cin.ignore();
             getline(cin, employees[idx].cityAddr);
             cout << "\n\tCity updated successfully!" << endl;
+            validUpdate = true;
             break;
-        }
-        case '3': {
+        case '3': 
             cout << "\n\tEnter new Department: ";
             cin.ignore();
             getline(cin, employees[idx].department);
             cout << "\n\tDepartment updated successfully!" << endl;
             break;
-        }
-        case '4': {
+        case '4': 
             cout << "\n\tEnter new Position: ";
             cin.ignore();
             getline(cin, employees[idx].position);
             cout << "\n\tPosition updated successfully!" << endl;
             break;
-        }
-        case '5': {
+        case '5': 
             cout << "\n\tEnter new Rate: ";
             cin >> employees[idx].rate;
             cout << "\n\tRate updated successfully!" << endl;
             break;
-        }
-        default:
-            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+        case '0':
+            clrscrn();
             employeeRec();
             return;
+        default:
+            showError = true;
+            continue;
+        }
     }
     ofstream outRec("employees.txt");
     for (int i = 0; i < employeeCount; i++) {
@@ -244,7 +258,6 @@ void updateEmployee() {
         outRec << employees[i].position << endl;
         outRec << employees[i].rate << endl;
     }
-    
     outRec.close();
     cout << "\n\tUpdated Employee Data:" << endl;
     cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
@@ -258,7 +271,9 @@ void updateEmployee() {
 void viewEmployee() {
     readDataEmployees();
     char choice;
-    cout << "\n\t----- View Employee ------" << endl;
+    cout << "\n\t--------------------------------\n";
+    cout << "\t|   V I E W   E M P L O Y E E  |\n";
+    cout << "\t--------------------------------\n";
     cout << "\n\t[1] View All Employees" << endl;
     cout << "\t[2] Search Employee by ID" << endl;
     cout << "\t[0] Back" << endl;
@@ -318,7 +333,9 @@ void viewEmployee() {
 }
 
 void deleteEmployee() {
-    cout << "\n\t----- Delete Employee ------" << endl;
+    cout << "\n\t------------------------------------\n";
+    cout << "\t|   D E L E T E   E M P L O Y E E  |\n";
+    cout << "\t------------------------------------\n";
     readDataEmployees();
     int delId;
     cout << "\n\tEnter Employee ID to Delete: ";
@@ -374,7 +391,9 @@ void deleteEmployee() {
 }
 
 void staffsRec() {
-    cout << "\n\t----- Staff Records Management ------" << endl;
+    cout << "\n\t-------------------------------------------------------\n";
+    cout << "\t|   S T A F F   R E C O R D S   M A N A G E M E N T   |\n";
+    cout << "\t-------------------------------------------------------\n";
     cout << "\n\t[1] Add Staff" << endl;
     cout << "\t[2] Update Staff" << endl;
     cout << "\t[3] View Staff" << endl;
@@ -414,7 +433,9 @@ void addStaff() {
     fstream staffRec;
     staffRec.open("staffs.txt", ios::app);
     bool idExists;
-    cout << "\n\t----- Add New Staff ------" << endl;
+    cout << "\n\t---------------------------------\n";
+    cout << "\t|   A D D   N E W   S T A F F   |\n";
+    cout << "\t---------------------------------\n";
     Staff newStaff;
     do {
         idExists = false;
@@ -463,7 +484,9 @@ void addStaff() {
 void viewStaff() {
     readDataStaff();
     char choice;
-    cout << "\n\t----- View Staff ------" << endl;
+    cout << "\n\t---------------------------\n";
+    cout << "\t|   V I E W   S T A F F   |\n";
+    cout << "\t---------------------------\n";
     cout << "\n\t[1] View All Staffs" << endl;
     cout << "\t[2] Search Staffs by ID" << endl;
     cout << "\t[0] Back" << endl;
@@ -523,7 +546,9 @@ void viewStaff() {
 }
 
 void updateStaff() {
-    cout << "\n\t----- Update Staff ------" << endl;
+    cout << "\n\t------------------------------\n";
+    cout << "\t|   U P D A T E  S T A F F   |\n";
+    cout << "\t------------------------------\n";
     readDataStaff();
     int updId;
     cout << "\n\tEnter Staff ID to Update: ";
@@ -541,7 +566,6 @@ void updateStaff() {
     if (!found) {
         cout << "\n\tStaff ID not found!" << endl;
         updateStaff();
-        return;
     }
     bool showError = false;
     while (true) {
@@ -567,9 +591,7 @@ void updateStaff() {
         cout << "\n\tChoice: ";
         char choice;
         cin >> choice;
-
         bool validUpdate = false;
-
         switch(choice) {
             case '1':
                 cout << "\n\tEnter New Username: ";
@@ -615,15 +637,11 @@ void updateStaff() {
                 staffsRec();
                 return;
             default:
-                // Kapag mali, set lang natin yung error flag to true
                 showError = true;
-                // Hindi na kailangan ng pause o cin.ignore dito kung char ang input
-                // Babalik siya sa taas ng loop -> mag ki-clear screen -> re-print table -> print error
                 continue; 
         }
-
         if(validUpdate) {
-            break; // Break loop to save data
+            break;
         }
     }
     ofstream outStaff("staffs.txt");
