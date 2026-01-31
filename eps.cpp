@@ -84,7 +84,6 @@ void employeeRec() {
     cout << "\t[0] Back" << endl;
     cout << "\n\tChoice: ";
     char choice;
-    cin >> choice;
 
     clrscrn();
 
