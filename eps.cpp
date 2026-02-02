@@ -6,11 +6,13 @@ using namespace std;
 
 void adminMenu(), staffMenu(), employeeMenu(), userAuthentication();
 void readDataEmployees(), employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
-void readDataStaffs(), staffsRec(), addStaff(), updateStaff(), viewStaff(), deleteStaff();
+void readDataStaff(), staffsRec(), addStaff(), updateStaff(), viewStaff(), deleteStaff();
 void clrscrn();
 
 struct Employee {
     int id;
+    string username;
+    string password;
     string fullName;
     string cityAddr;
     string department;
@@ -44,6 +46,8 @@ void readDataEmployees() {
     string line;
     while(getline(readEmp, line)) {
         employees[employeeCount].id = stoi(line);
+        getline(readEmp, employees[employeeCount].username);
+        getline(readEmp, employees[employeeCount].password);
         getline(readEmp, employees[employeeCount].fullName);
         getline(readEmp, employees[employeeCount].cityAddr);
         getline(readEmp, employees[employeeCount].department);
@@ -84,6 +88,7 @@ void employeeRec() {
     cout << "\t[0] Back" << endl;
     cout << "\n\tChoice: ";
     char choice;
+    cin >> choice;
 
     clrscrn();
 
@@ -134,8 +139,12 @@ void addEmployee() {
         }
     } while (idExists);
 
-    cout << "\n\tEnter Full Name: ";
+    cout << "\n\tEnter Username: ";
     cin.ignore();
+    getline(cin, newEmp.username);
+    cout << "\n\tEnter Password: ";
+    getline(cin, newEmp.password);
+    cout << "\n\tEnter Full Name: ";
     getline(cin, newEmp.fullName);
     cout << "\n\tEnter City Address: ";
     getline(cin, newEmp.cityAddr);
@@ -152,6 +161,8 @@ void addEmployee() {
     cout << "\n\tEmployee Added Successfully!" << endl;
 
     empRec << newEmp.id << endl;
+    empRec << newEmp.username << endl;
+    empRec << newEmp.password << endl;
     empRec << newEmp.fullName << endl;
     empRec << newEmp.cityAddr << endl;
     empRec << newEmp.department << endl;
@@ -188,20 +199,22 @@ void updateEmployee() {
         clrscrn();
         cout << "\n\tEmployee to Update:" << endl;
         cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
         cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-        cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
+        cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].username << " | " << setw(13) << employees[idx].password << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
         cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
         if (showError) {
             cout << "\n\tInvalid Choice! Please Try Again." << endl;
             showError = false;
         }
         cout << "\n\tWhat do you want to change?" << endl;
-        cout << "\t[1] Change Name" << endl;
-        cout << "\t[2] Change City" << endl;
-        cout << "\t[3] Change Department" << endl;
-        cout << "\t[4] Change Position" << endl;
-        cout << "\t[5] Change Rate" << endl;
+        cout << "\t[1] Change Username" << endl;
+        cout << "\t[2] Change Password" << endl;
+        cout << "\t[3] Change Name" << endl;
+        cout << "\t[4] Change City" << endl;
+        cout << "\t[5] Change Department" << endl;
+        cout << "\t[6] Change Position" << endl;
+        cout << "\t[7] Change Rate" << endl;
         cout << "\t[0] Back" << endl;
         cout << "\tChoice: ";
         char choice;
@@ -209,32 +222,45 @@ void updateEmployee() {
         bool validUpdate = true;
         switch (choice) {
             case '1':
-            cout << "\n\tEnter new Name: ";
+            cout << "\n\tEnter new Username: ";
             cin.ignore();
-            getline(cin, employees[idx].fullName);
-            cout << "\n\tName updated successfully!" << endl;
+            getline(cin, employees[idx].username);
+            cout << "\n\tUsername updated successfully!" << endl;
             validUpdate = true;
             break;
         case '2':
+            cout << "\n\tEnter new Password: ";
+            cin.ignore();
+            getline(cin, employees[idx].password);
+            cout << "\n\tPassword updated successfully!" << endl;
+            validUpdate = true;
+            break;
+        case '3':
+            cout << "\n\tEnter new Full Name: ";
+            cin.ignore();
+            getline(cin, employees[idx].fullName);
+            cout << "\n\tFull Name updated successfully!" << endl;
+            validUpdate = true;
+            break;
+        case '4':
             cout << "\n\tEnter new City: ";
             cin.ignore();
             getline(cin, employees[idx].cityAddr);
             cout << "\n\tCity updated successfully!" << endl;
-            validUpdate = true;
             break;
-        case '3': 
+        case '5': 
             cout << "\n\tEnter new Department: ";
             cin.ignore();
             getline(cin, employees[idx].department);
             cout << "\n\tDepartment updated successfully!" << endl;
             break;
-        case '4': 
+        case '6': 
             cout << "\n\tEnter new Position: ";
             cin.ignore();
             getline(cin, employees[idx].position);
             cout << "\n\tPosition updated successfully!" << endl;
             break;
-        case '5': 
+        case '7': 
             cout << "\n\tEnter new Rate: ";
             cin >> employees[idx].rate;
             cout << "\n\tRate updated successfully!" << endl;
@@ -251,6 +277,8 @@ void updateEmployee() {
     ofstream outRec("employees.txt");
     for (int i = 0; i < employeeCount; i++) {
         outRec << employees[i].id << endl;
+        outRec << employees[i].username << endl;
+        outRec << employees[i].password << endl;
         outRec << employees[i].fullName << endl;
         outRec << employees[i].cityAddr << endl;
         outRec << employees[i].department << endl;
@@ -260,9 +288,9 @@ void updateEmployee() {
     outRec.close();
     cout << "\n\tUpdated Employee Data:" << endl;
     cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
     cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-    cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
+    cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].username << " | " << setw(13) << employees[idx].password << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
     cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
     employeeRec();
 }
@@ -287,10 +315,10 @@ void viewEmployee() {
                 cout << "\n\tNo employees found!" << endl;
             } else {
                 cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-                cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+                cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
                 cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
                 for (int i = 0; i < employeeCount; i++) {
-                    cout << "\t| " << left << setw(3) << employees[i].id << " | " << setw(13) << employees[i].fullName << " | " << setw(13) << employees[i].cityAddr << " | " << setw(18) << employees[i].department << " | " << setw(13) << employees[i].position << " | " << setw(6) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
+                    cout << "\t| " << left << setw(3) << employees[i].id << " | " << setw(13) << employees[i].username << " | " << setw(13) << employees[i].password << " | " << setw(13) << employees[i].fullName << " | " << setw(13) << employees[i].cityAddr << " | " << setw(18) << employees[i].department << " | " << setw(13) << employees[i].position << " | " << setw(6) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
                 }
                 cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
             }
@@ -307,9 +335,9 @@ void viewEmployee() {
                     if (employees[i].id == searchId) {
                         cout << "\n\t----- Employee Details ------" << endl;
                         cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-                        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+                        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
                         cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-                        cout << "\t| " << left << setw(3) << employees[i].id << " | " << setw(13) << employees[i].fullName << " | " << setw(13) << employees[i].cityAddr << " | " << setw(18) << employees[i].department << " | " << setw(13) << employees[i].position << " | " << setw(6) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
+                        cout << "\t| " << left << setw(3) << employees[i].id << " | " << setw(13) << employees[i].username << " | " << setw(13) << employees[i].password << " | " << setw(13) << employees[i].fullName << " | " << setw(13) << employees[i].cityAddr << " | " << setw(18) << employees[i].department << " | " << setw(13) << employees[i].position << " | " << setw(6) << fixed << setprecision(2) << employees[i].rate << " |" << endl;
                         cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
                         found = true;
                         break;
@@ -356,9 +384,9 @@ void deleteEmployee() {
     }
     cout << "\n\tEmployee to Delete:" << endl;
     cout << "\n\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
+    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(13) << "Name" << " | " << setw(13) << "City" << " | " << setw(18) << "Department" << " | " << setw(13) << "Position" << " | " << setw(6) << "Rate" << " |" << endl;
     cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
-    cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
+    cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(13) << employees[idx].username << " | " << setw(13) << employees[idx].password << " | " << setw(13) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " | " << setw(18) << employees[idx].department << " | " << setw(13) << employees[idx].position << " | " << setw(6) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
     cout << "\t+-----+---------------+---------------+--------------------+---------------+--------+" << endl;
     cout << "\n\tAre you sure?" << endl;
     cout << "\t[1] Delete Row of Data" << endl;
@@ -375,6 +403,8 @@ void deleteEmployee() {
         ofstream outRec("employees.txt");
         for (int i = 0; i < employeeCount; i++) {
             outRec << employees[i].id << endl;
+            outRec << employees[i].username << endl;
+            outRec << employees[i].password << endl;
             outRec << employees[i].fullName << endl;
             outRec << employees[i].cityAddr << endl;
             outRec << employees[i].department << endl;
@@ -778,6 +808,16 @@ void employeeMenu() {
 
 }
 
+bool authenticateStaff(string username, string password) {
+    readDataStaff();
+    for(int i = 0; i < staffCount; i++) {
+        if(staffs[i].username == username && staffs[i].password == password) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 void userAuthentication() {
     int attempt = 3;
@@ -799,7 +839,7 @@ void userAuthentication() {
             cout << "\n\tLogin Successful! Welcome Admin." << endl;
             adminMenu();
             break;
-        } else if(username == "staff" && password == "staff123") {
+        } else if(authenticateStaff(username, password)) {
             cout << "\n\tLogin Successful! Welcome Staff." << endl;
             staffMenu();
             break;
@@ -817,5 +857,5 @@ void userAuthentication() {
 }
 
 void clrscrn() {
-    system("clear");
+    system("cls");
 }
