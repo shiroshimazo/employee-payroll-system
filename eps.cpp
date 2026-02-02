@@ -818,6 +818,15 @@ bool authenticateStaff(string username, string password) {
     return false;
 }
 
+bool authenticateEmployee(string username, string password) {
+    readDataEmployees();
+    for(int i = 0; i < employeeCount; i++) {
+        if(employees[i].username == username && employees[i].password == password) {
+            return true;
+        }
+    }
+    return false;
+}
 
 void userAuthentication() {
     int attempt = 3;
@@ -843,7 +852,7 @@ void userAuthentication() {
             cout << "\n\tLogin Successful! Welcome Staff." << endl;
             staffMenu();
             break;
-        } else if(username == "employee" && password == "emp123") {
+        } else if(authenticateEmployee(username, password)) {
             cout << "\n\tLogin Successful! Welcome Employee." << endl;
             employeeMenu();
             break;
