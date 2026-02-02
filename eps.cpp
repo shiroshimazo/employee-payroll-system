@@ -36,7 +36,7 @@ int employeeCount = 0;
 int staffCount = 0;
 
 int main() {
-    viewEmployee();
+    userAuthentication();
     return 0;
 }
 
@@ -805,7 +805,51 @@ void staffMenu() {
 }
 
 void employeeMenu() {
+    cout << "\n\t+-------------------------------------+\n";
+    cout << "\t|  E M P L O Y E E   D A S H B O A R D |\n";
+    cout << "\t+--------------------------------------+\n";
+    cout << "\n\t[1] View Salary Information" << endl;
+    cout << "\t[2] Print Payslip" << endl;
+    cout << "\t[3] Update Personal Information" << endl;
+    cout << "\n[4] Settings" << endl;
+    cout << "\t[0] Logout" << endl;
+    cout << "\n\tChoice: ";
+    char choice;
+    cin >> choice;
 
+    clrscrn();
+
+    switch(choice) {
+        case '1':
+            break;
+        case '2':
+            break;
+        case '3':
+            break;
+        case '4':
+            break;
+        case '0':
+            char confirm;
+            while(true) {
+                cout << "\n\tAre you sure you want to logout? (y/n): ";
+                cin >> confirm;
+                if(confirm == 'y' || confirm == 'Y') {
+                    cout << "\n\tLogging out..." << endl;
+                    userAuthentication();
+                    break;
+                } else if(confirm == 'n' || confirm == 'N') {
+                    employeeMenu();
+                    break;
+                } else {
+                    cout << "\n\tInvalid input! Please Try Again." << endl;
+                }
+            }
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            employeeMenu();
+            break;
+    }
 }
 
 bool authenticateStaff(string username, string password) {
