@@ -7,6 +7,7 @@ using namespace std;
 void adminMenu(), staffMenu(), employeeMenu(), userAuthentication();
 void readDataEmployees(), employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
 void readDataStaff(), staffsRec(), addStaff(), updateStaff(), viewStaff(), deleteStaff();
+void viewSalaryInfo(), printPayslip(), updatePersonalInfo(), employeeSecurity();
 void clrscrn();
 
 struct Employee {
@@ -811,7 +812,7 @@ void employeeMenu() {
     cout << "\n\t[1] View Salary Information" << endl;
     cout << "\t[2] Print Payslip" << endl;
     cout << "\t[3] Update Personal Information" << endl;
-    cout << "\n[4] Settings" << endl;
+    cout << "\t[4] Security" << endl;
     cout << "\t[0] Logout" << endl;
     cout << "\n\tChoice: ";
     char choice;
@@ -821,12 +822,16 @@ void employeeMenu() {
 
     switch(choice) {
         case '1':
+            viewSalaryInfo();
             break;
         case '2':
+            printPayslip();
             break;
         case '3':
+            updatePersonalInfo();
             break;
         case '4':
+            employeeSecurity();
             break;
         case '0':
             char confirm;
@@ -851,6 +856,81 @@ void employeeMenu() {
             break;
     }
 }
+
+void viewSalaryInfo() {
+
+}
+
+void printPayslip() {
+
+}
+
+void updatePersonalInfo() {
+
+}
+
+void employeeSecurity() {
+    char choice;
+    cout << "\n\t+--------------------+\n";
+    cout << "\t|   S E C U R I T Y   |\n";
+    cout << "\t+---------------------+\n";
+    cout << "\n\t[1] Change Password" << endl;
+    cout << "\t[0] Back" << endl;
+    cout << "\n\tChoice: ";
+    char choice;
+    cin >> choice;
+    
+    switch(choice) {
+        case '1':
+            changePassword();
+            break;
+        case '0':
+            employeeMenu();
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            employeeSecurity();
+            break;
+    }
+}
+
+void changePassword() {
+    string username, oldPassword, newPassword;
+    cout << "\n\tEnter Username: ";
+    cin >> username;
+    cout << "\n\tEnter Old Password: ";
+    cin >> oldPassword;
+
+    if(authenticateEmployee(username, oldPassword)) {
+        cout << "\n\tEnter New Password: ";
+        cin >> newPassword;
+
+        for(int i = 0; i < employeeCount; i++) {
+            if(employees[i].username == username) {
+                employees[i].password = newPassword;
+                break;
+            }
+        }
+
+        ofstream outRec("employees.txt");
+        for (int i = 0; i < employeeCount; i++) {
+            outRec << employees[i].id << endl;
+            outRec << employees[i].username << endl;
+            outRec << employees[i].password << endl;
+            outRec << employees[i].fullName << endl;
+            outRec << employees[i].cityAddr << endl;
+            outRec << employees[i].department << endl;
+            outRec << employees[i].position << endl;
+            outRec << employees[i].rate << endl;
+        }
+        outRec.close();
+        cout << "\n\tPassword changed successfully!" << endl;
+    } else {
+        cout << "\n\tInvalid Username or Old Password!" << endl;
+    }
+    employeeSecurity();
+}
+
 
 bool authenticateStaff(string username, string password) {
     readDataStaff();
@@ -906,7 +986,6 @@ void userAuthentication() {
             cout << "\n\tRemaining Attempts: " << attempt << endl;
         }
     }
-
 }
 
 void clrscrn() {
