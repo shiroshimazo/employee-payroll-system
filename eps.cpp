@@ -6,9 +6,10 @@ using namespace std;
 
 void adminMenu(), staffMenu(), employeeMenu(), userAuthentication();
 void readDataEmployees(), employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
-void readDataStaff(), staffsRec(), addStaff(), updateStaff(), viewStaff(), deleteStaff();
+void readDataStaff(), staffsRec(), addStaff(), updateStaff(), viewStaff(), deleteStaff(), changePassword();
 void viewSalaryInfo(), printPayslip(), updatePersonalInfo(), employeeSecurity();
 void clrscrn();
+bool authenticateEmployee(string username, string password);
 
 struct Employee {
     int id;
@@ -870,7 +871,6 @@ void updatePersonalInfo() {
 }
 
 void employeeSecurity() {
-    char choice;
     cout << "\n\t+--------------------+\n";
     cout << "\t|   S E C U R I T Y   |\n";
     cout << "\t+---------------------+\n";
