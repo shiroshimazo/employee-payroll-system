@@ -1,6 +1,6 @@
 101
 admin
-admin1
+admin2
 Jeremy Malana
 Quezon City
 Delivery

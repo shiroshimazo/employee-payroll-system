@@ -807,7 +807,7 @@ void staffMenu() {
 }
 
 void employeeMenu() {
-    cout << "\n\t+-------------------------------------+\n";
+    cout << "\n\t+--------------------------------------+\n";
     cout << "\t|  E M P L O Y E E   D A S H B O A R D |\n";
     cout << "\t+--------------------------------------+\n";
     cout << "\n\t[1] View Salary Information" << endl;
@@ -879,6 +879,8 @@ void employeeSecurity() {
     cout << "\n\tChoice: ";
     char choice;
     cin >> choice;
+    
+    clrscrn();
     
     switch(choice) {
         case '1':
