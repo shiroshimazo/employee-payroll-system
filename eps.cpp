@@ -10,6 +10,8 @@ void readDataStaff(), staffsRec(), addStaff(), updateStaff(), viewStaff(), delet
 void viewSalaryInfo(), printPayslip(), updatePersonalInfo(), employeeSecurity();
 void clrscrn();
 bool authenticateEmployee(string username, string password);
+void employeeMenu(string loggedInUser);
+void updatePersonalInfo(string loggedInUser);
 
 struct Employee {
     int id;
@@ -36,6 +38,7 @@ Employee employees[100];
 Staff staffs[100];
 int employeeCount = 0;
 int staffCount = 0;
+string loggedInUser = "";
 
 int main() {
     userAuthentication();
@@ -273,7 +276,11 @@ void updateEmployee() {
             return;
         default:
             showError = true;
+            validUpdate = false;
             continue;
+        }
+        if(validUpdate) {
+            break;
         }
     }
     ofstream outRec("employees.txt");
@@ -867,7 +874,94 @@ void printPayslip() {
 }
 
 void updatePersonalInfo() {
+    readDataEmployees();
+    int idx = -1;
+    for (int i = 0; i < employeeCount; i++) {
+        if (employees[i].username == loggedInUser) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx == -1) {
+        cout << "\n\tError: Employee record not found!" << endl;
+        employeeMenu();
+        return;
+    }
 
+    bool showError = false;
+    while (true) {
+        clrscrn();
+        cout << "\n\t---------------------------------------------------\n";
+        cout << "\t|   U P D A T E   P E R S O N A L   I N F O       |\n";
+        cout << "\t---------------------------------------------------\n";
+
+        cout << "\n\tYour Current Personal Information:" << endl;
+        cout << "\n\t+-----+----------------------+---------------+" << endl;
+        cout << "\t| " << left << setw(3) << "ID" << " | " << setw(20) << "Full Name" << " | " << setw(13) << "City" << " |" << endl;
+        cout << "\t+-----+----------------------+---------------+" << endl;
+        cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(20) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " |" << endl;
+        cout << "\t+-----+----------------------+---------------+" << endl;
+
+        if (showError) {
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            showError = false;
+        }
+
+        cout << "\n\tWhat do you want to update?" << endl;
+        cout << "\t[1] Change Full Name" << endl;
+        cout << "\t[2] Change City Address" << endl;
+        cout << "\t[0] Back" << endl;
+        cout << "\n\tChoice: ";
+        char choice;
+        cin >> choice;
+
+        bool validUpdate = false;
+        switch (choice) {
+            case '1':
+                cout << "\n\tEnter new Full Name: ";
+                cin.ignore();
+                getline(cin, employees[idx].fullName);
+                cout << "\n\tFull Name updated successfully!" << endl;
+                validUpdate = true;
+                break;
+            case '2':
+                cout << "\n\tEnter new City Address: ";
+                cin.ignore();
+                getline(cin, employees[idx].cityAddr);
+                cout << "\n\tCity Address updated successfully!" << endl;
+                validUpdate = true;
+                break;
+            case '0':
+                clrscrn();
+                employeeMenu();
+                return;
+            default:
+                showError = true;
+                continue;
+        }
+
+        if (validUpdate) {
+            ofstream outRec("employees.txt");
+            for (int i = 0; i < employeeCount; i++) {
+                outRec << employees[i].id << endl;
+                outRec << employees[i].username << endl;
+                outRec << employees[i].password << endl;
+                outRec << employees[i].fullName << endl;
+                outRec << employees[i].cityAddr << endl;
+                outRec << employees[i].department << endl;
+                outRec << employees[i].position << endl;
+                outRec << employees[i].rate << endl;
+            }
+            outRec.close();
+
+            cout << "\n\tUpdated Personal Information:" << endl;
+            cout << "\n\t+-----+----------------------+---------------+" << endl;
+            cout << "\t| " << left << setw(3) << "ID" << " | " << setw(20) << "Full Name" << " | " << setw(13) << "City" << " |" << endl;
+            cout << "\t+-----+----------------------+---------------+" << endl;
+            cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(20) << employees[idx].fullName << " | " << setw(13) << employees[idx].cityAddr << " |" << endl;
+            cout << "\t+-----+----------------------+---------------+" << endl;
+        }
+    }
 }
 
 void employeeSecurity() {
@@ -980,6 +1074,7 @@ void userAuthentication() {
             break;
         } else if(authenticateEmployee(username, password)) {
             cout << "\n\tLogin Successful! Welcome Employee." << endl;
+            loggedInUser = username;
             employeeMenu();
             break;
         } else {
