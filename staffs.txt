@@ -1,14 +1,5 @@
-102
-user2
-user2
-User1
-Quezon City
+101
+staff
+staff123
+Frescil
 HR
-120
-103
-user3
-user3
-user3
-Bulacan
-HR
-120
