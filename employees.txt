@@ -1,16 +1,26 @@
 101
-admin
-admin2
-Jeremy Malana
-Quezon City
-Delivery
-Driver
-101
-102
+employee1
 emp123
-emp1
-Frescil Lunzaga
+Jeremy Malana
+Male
+09626881002
+jrmymlna@gmail.com
+Quezon City
+Driver
+0028-1215160-9
+11-201534404-7
+1290-4367-2187
+80
+2
+employee2
+emp456
+Frescil
+Female
+0957236481
+Dvao
 Davao
-Package
-Cargo
-800
+Machine Operator
+0028-1215160-2
+11-201534404-1
+1290-4367-2185
+100
