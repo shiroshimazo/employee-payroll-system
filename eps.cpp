@@ -12,6 +12,8 @@ void clrscrn();
 bool authenticateEmployee(string username, string password);
 void employeeMenu(string loggedInUser);
 void updatePersonalInfo(string loggedInUser);
+void inputAttendance(), computeSalary(), staffGeneratePayslip();
+void readDataAttendance(), readDataPayroll();
 
 struct Employee {
     int id;
@@ -37,6 +39,38 @@ struct Staff {
     string role;
 };
 
+struct Attendance {
+    int employeeId;
+    string employeeName;
+    double hoursWorked;
+    double overtimeHours;
+    string date;
+};
+
+struct Payroll {
+    int employeeId;
+    string employeeName;
+    string position;
+    double rate;
+    double hoursWorked;
+    double overtimeHours;
+    double overtimePay;
+    double grossPay;
+    double sssDeduction;
+    double philhealthDeduction;
+    double pagibigDeduction;
+    double loanDeduction;
+    double advanceFee;
+    double totalDeductions;
+    double netPay;
+    string date;
+};
+
+Attendance attendances[100];
+Payroll payrolls[100];
+int attendanceCount = 0;
+int payrollCount = 0;
+
 Employee employees[100];
 Staff staffs[100];
 int employeeCount = 0;
@@ -46,6 +80,61 @@ string loggedInUser = "";
 int main() {
     userAuthentication();
     return 0;
+}
+
+void readDataAttendance() {
+    ifstream readAtt("attendance.txt");
+    attendanceCount = 0;
+    string line;
+    while(getline(readAtt, line)) {
+        attendances[attendanceCount].employeeId = stoi(line);
+        getline(readAtt, attendances[attendanceCount].employeeName);
+        getline(readAtt, line);
+        attendances[attendanceCount].hoursWorked = stod(line);
+        getline(readAtt, line);
+        attendances[attendanceCount].overtimeHours = stod(line);
+        getline(readAtt, attendances[attendanceCount].date);
+        attendanceCount++;
+    }
+    readAtt.close();
+}
+
+void readDataPayroll() {
+    ifstream readPay("payroll.txt");
+    payrollCount = 0;
+    string line;
+    while(getline(readPay, line)) {
+        payrolls[payrollCount].employeeId = stoi(line);
+        getline(readPay, payrolls[payrollCount].employeeName);
+        getline(readPay, payrolls[payrollCount].position);
+        getline(readPay, line);
+        payrolls[payrollCount].rate = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].hoursWorked = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].overtimeHours = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].overtimePay = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].grossPay = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].sssDeduction = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].philhealthDeduction = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].pagibigDeduction = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].loanDeduction = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].advanceFee = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].totalDeductions = stod(line);
+        getline(readPay, line);
+        payrolls[payrollCount].netPay = stod(line);
+        getline(readPay, payrolls[payrollCount].date);
+        payrollCount++;
+    }
+    readPay.close();
 }
 
 void readDataEmployees() {
@@ -654,7 +743,7 @@ void addStaff() {
     staffs[staffCount] = newStaff;
     staffCount++;
 
-    cout << "\n\tEmployee Added Successfully!" << endl;
+    cout << "\n\tStaff Added Successfully!" << endl;
 
     staffRec << newStaff.id << endl;
     staffRec << newStaff.username << endl;
@@ -853,7 +942,7 @@ void deleteStaff() {
     }
     if(!found) {
         cout << "\n\tStaff not found!" << endl;
-        return;
+        staffsRec();
     }
     cout << "\n\tStaff to delete:" << endl;
     cout << "\n\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
@@ -886,7 +975,7 @@ void deleteStaff() {
     } else {
         cout << "\n\tDeletion cancelled!" << endl;
     }
-    deleteStaff();
+    staffsRec();
 }
 
 void adminMenu() {
@@ -938,16 +1027,458 @@ void adminMenu() {
 }
 
 void staffMenu() {
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t|  S T A F F   D A S H B O A R D   |\n";
+    cout << "\t+----------------------------------+\n";
+    cout << "\n\t[1] Input Employee Attendance" << endl;
+    cout << "\t[2] Compute Salary" << endl;
+    cout << "\t[3] Generate Payslip" << endl;
+    cout << "\t[0] Logout" << endl;
+    cout << "\n\tChoice: ";
+    char choice;
+    cin >> choice;
+    clrscrn();
 
+    switch(choice) {
+        case '1':
+            inputAttendance();
+            break;
+        case '2':
+            computeSalary();
+            break;
+        case '3':
+            staffGeneratePayslip();
+            break;
+        case '0':
+            char confirm;
+            while(true) {
+                cout << "\n\tAre you sure you want to logout? (y/n): ";
+                cin >> confirm;
+                if(confirm == 'y' || confirm == 'Y') {
+                    cout << "\n\tLogging out..." << endl;
+                    loggedInUser = "";
+                    userAuthentication();
+                    break;
+                } else if(confirm == 'n' || confirm == 'N') {
+                    staffMenu();
+                    break;
+                } else {
+                    cout << "\n\tInvalid input! Please Try Again." << endl;
+                }
+            }
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            staffMenu();
+            break;
+    }
 }
 
+
+void inputAttendance() {
+    readDataEmployees();
+    cout << "\n\t-------------------------------------------\n";
+    cout << "\t|   I N P U T   A T T E N D A N C E       |\n";
+    cout << "\t-------------------------------------------\n";
+
+    int empId;
+    cout << "\n\tEnter Employee ID: ";
+    cin >> empId;
+
+    // Find the employee
+    bool found = false;
+    int idx = -1;
+    for (int i = 0; i < employeeCount; i++) {
+        if (employees[i].id == empId) {
+            found = true;
+            idx = i;
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "\n\tEmployee ID not found!" << endl;
+        staffMenu();
+        return;
+    }
+
+    clrscrn();
+    cout << "\n\tEmployee Found: " << employees[idx].fullName << endl;
+    cout << "\tPosition: " << employees[idx].position << endl;
+    cout << "\tRate: P " << fixed << setprecision(2) << employees[idx].rate << "/hr" << endl;
+
+    Attendance newAtt;
+    newAtt.employeeId = employees[idx].id;
+    newAtt.employeeName = employees[idx].fullName;
+
+    // Pay period selection
+    string month;
+    int year;
+    char period;
+
+    cout << "\n\tEnter Month (e.g. January): ";
+    cin.ignore();
+    getline(cin, month);
+    cout << "\n\tEnter Year (e.g. 2026): ";
+    cin >> year;
+
+    while (true) {
+        cout << "\n\tSelect Pay Period:" << endl;
+        cout << "\t[1] 1st - 15th" << endl;
+        cout << "\t[2] 16th - 30th/31st" << endl;
+        cout << "\tChoice: ";
+        cin >> period;
+        if (period == '1') {
+            newAtt.date = month + " 1-15, " + to_string(year);
+            break;
+        } else if (period == '2') {
+            newAtt.date = month + " 16-30, " + to_string(year);
+            break;
+        } else {
+            cout << "\n\tInvalid input! Please Try Again." << endl;
+        }
+    }
+
+    cout << "\n\tEnter Total Hours Worked (for the 15-day period): ";
+    cin >> newAtt.hoursWorked;
+
+    // Ask for overtime
+    char hasOvertime;
+    newAtt.overtimeHours = 0;
+    while (true) {
+        cout << "\n\tDoes this employee have overtime? (y/n): ";
+        cin >> hasOvertime;
+        if (hasOvertime == 'y' || hasOvertime == 'Y') {
+            cout << "\n\tEnter Overtime Hours: ";
+            cin >> newAtt.overtimeHours;
+            break;
+        } else if (hasOvertime == 'n' || hasOvertime == 'N') {
+            break;
+        } else {
+            cout << "\n\tInvalid input! Please Try Again." << endl;
+        }
+    }
+
+    // Save to attendance.txt
+    fstream attFile;
+    attFile.open("attendance.txt", ios::app);
+    attFile << newAtt.employeeId << endl;
+    attFile << newAtt.employeeName << endl;
+    attFile << newAtt.hoursWorked << endl;
+    attFile << newAtt.overtimeHours << endl;
+    attFile << newAtt.date << endl;
+    attFile.close();
+
+    cout << "\n\tAttendance recorded successfully!" << endl;
+    cout << "\n\t+-----+----------------------+---------------------+---------------+---------------+" << endl;
+    cout << "\t| " << left << setw(3) << "ID"
+         << " | " << setw(20) << "Employee Name"
+         << " | " << setw(19) << "Pay Period"
+         << " | " << setw(13) << "Hours Worked"
+         << " | " << setw(13) << "Overtime Hrs" << " |" << endl;
+    cout << "\t+-----+----------------------+---------------------+---------------+---------------+" << endl;
+    cout << "\t| " << left << setw(3) << newAtt.employeeId
+         << " | " << setw(20) << newAtt.employeeName
+         << " | " << setw(19) << newAtt.date
+         << " | " << setw(13) << fixed << setprecision(2) << newAtt.hoursWorked
+         << " | " << setw(13) << fixed << setprecision(2) << newAtt.overtimeHours << " |" << endl;
+    cout << "\t+-----+----------------------+---------------------+---------------+---------------+" << endl;
+
+    staffMenu();
+}
+
+void computeSalary() {
+    readDataEmployees();
+    readDataAttendance();
+
+    cout << "\n\t-----------------------------------------\n";
+    cout << "\t|   C O M P U T E   S A L A R Y         |\n";
+    cout << "\t-----------------------------------------\n";
+
+    int empId;
+    cout << "\n\tEnter Employee ID: ";
+    cin >> empId;
+
+    // Find employee
+    bool foundEmp = false;
+    int empIdx = -1;
+    for (int i = 0; i < employeeCount; i++) {
+        if (employees[i].id == empId) {
+            foundEmp = true;
+            empIdx = i;
+            break;
+        }
+    }
+
+    if (!foundEmp) {
+        cout << "\n\tEmployee ID not found!" << endl;
+        staffMenu();
+        return;
+    }
+
+    // Show all attendance records for this employee
+    cout << "\n\tAttendance records for " << employees[empIdx].fullName << ":" << endl;
+    cout << "\n\t+-----+---------------------+---------------+---------------+" << endl;
+    cout << "\t| " << left << setw(3) << "No."
+         << " | " << setw(19) << "Pay Period"
+         << " | " << setw(13) << "Hours Worked"
+         << " | " << setw(13) << "Overtime Hrs" << " |" << endl;
+    cout << "\t+-----+---------------------+---------------+---------------+" << endl;
+
+    int matchCount = 0;
+    int matchIndexes[100];
+    for (int i = 0; i < attendanceCount; i++) {
+        if (attendances[i].employeeId == empId) {
+            matchCount++;
+            matchIndexes[matchCount - 1] = i;
+            cout << "\t| " << left << setw(3) << matchCount
+                 << " | " << setw(19) << attendances[i].date
+                 << " | " << setw(13) << fixed << setprecision(2) << attendances[i].hoursWorked
+                 << " | " << setw(13) << fixed << setprecision(2) << attendances[i].overtimeHours << " |" << endl;
+        }
+    }
+    cout << "\t+-----+---------------------+---------------+---------------+" << endl;
+
+    if (matchCount == 0) {
+        cout << "\n\tNo attendance record found for this employee!" << endl;
+        cout << "\tPlease input attendance first." << endl;
+        staffMenu();
+        return;
+    }
+
+    // Let staff pick which pay period to compute
+    int selection;
+    cout << "\n\tSelect Pay Period to compute (enter number): ";
+    cin >> selection;
+
+    if (selection < 1 || selection > matchCount) {
+        cout << "\n\tInvalid selection!" << endl;
+        staffMenu();
+        return;
+    }
+
+    int attIdx = matchIndexes[selection - 1];
+
+    clrscrn();
+
+    // ===== COMPUTE PAYROLL =====
+    double rate = employees[empIdx].rate;
+    double hoursWorked = attendances[attIdx].hoursWorked;
+    double overtimeHours = attendances[attIdx].overtimeHours;
+
+    double overtimePay = overtimeHours * (rate * 1.25);
+    double grossPay = (rate * hoursWorked) + overtimePay;
+
+    // === GOVERNMENT DEDUCTIONS ===
+    double sssDeduction = grossPay * 0.05;
+    double philhealthDeduction = grossPay * 0.025;
+    double pagibigDeduction = 200.00;
+    if (grossPay < 1500) {
+        pagibigDeduction = grossPay * 0.01;
+    }
+
+    // === LOAN & ADVANCE FEE ===
+    double loanDeduction = 0;
+    double advanceFee = 0;
+
+    // Display initial computation
+    cout << "\n\t====================================================" << endl;
+    cout << "\t         S A L A R Y   C O M P U T A T I O N" << endl;
+    cout << "\t====================================================" << endl;
+    cout << "\n\tEmployee ID     : " << employees[empIdx].id << endl;
+    cout << "\tEmployee Name   : " << employees[empIdx].fullName << endl;
+    cout << "\tPosition        : " << employees[empIdx].position << endl;
+    cout << "\tPay Period      : " << attendances[attIdx].date << endl;
+    cout << "\t----------------------------------------------------" << endl;
+    cout << "\tRate/Hour       : P " << fixed << setprecision(2) << rate << endl;
+    cout << "\tHours Worked    : " << hoursWorked << endl;
+    cout << "\tOvertime Hours  : " << overtimeHours << endl;
+    cout << "\tOvertime Pay    : P " << overtimePay << endl;
+    cout << "\tGross Pay       : P " << grossPay << endl;
+    cout << "\t----------------------------------------------------" << endl;
+    cout << "\t           D E D U C T I O N S" << endl;
+    cout << "\t----------------------------------------------------" << endl;
+    cout << "\tSSS        (5%) : P " << sssDeduction << endl;
+    cout << "\tPhilHealth(2.5%): P " << philhealthDeduction << endl;
+    cout << "\tPag-IBIG        : P " << pagibigDeduction << endl;
+
+    // Ask for loan
+    char hasLoan;
+    while (true) {
+        cout << "\n\tDoes this employee have a loan deduction? (y/n): ";
+        cin >> hasLoan;
+        if (hasLoan == 'y' || hasLoan == 'Y') {
+            cout << "\n\tEnter Loan Amount: P ";
+            cin >> loanDeduction;
+            break;
+        } else if (hasLoan == 'n' || hasLoan == 'N') {
+            break;
+        } else {
+            cout << "\n\tInvalid input! Please Try Again." << endl;
+        }
+    }
+
+    // Ask for advance fee
+    char hasAdvance;
+    while (true) {
+        cout << "\n\tDoes this employee have a cash advance deduction? (y/n): ";
+        cin >> hasAdvance;
+        if (hasAdvance == 'y' || hasAdvance == 'Y') {
+            cout << "\n\tEnter Cash Advance Amount: P ";
+            cin >> advanceFee;
+            break;
+        } else if (hasAdvance == 'n' || hasAdvance == 'N') {
+            break;
+        } else {
+            cout << "\n\tInvalid input! Please Try Again." << endl;
+        }
+    }
+
+    // === FINAL COMPUTATION ===
+    double totalDeductions = sssDeduction + philhealthDeduction + pagibigDeduction + loanDeduction + advanceFee;
+    double netPay = grossPay - totalDeductions;
+
+    clrscrn();
+
+    // === DISPLAY FINAL PAYROLL RECEIPT ===
+    cout << "\n\t====================================================" << endl;
+    cout << "\t         S A L A R Y   C O M P U T A T I O N" << endl;
+    cout << "\t====================================================" << endl;
+    cout << "\n\tEmployee ID     : " << employees[empIdx].id << endl;
+    cout << "\tEmployee Name   : " << employees[empIdx].fullName << endl;
+    cout << "\tPosition        : " << employees[empIdx].position << endl;
+    cout << "\tPay Period      : " << attendances[attIdx].date << endl;
+    cout << "\t----------------------------------------------------" << endl;
+    cout << "\tRate/Hour       : P " << fixed << setprecision(2) << rate << endl;
+    cout << "\tHours Worked    : " << hoursWorked << endl;
+    cout << "\tOvertime Hours  : " << overtimeHours << endl;
+    cout << "\tOvertime Pay    : P " << overtimePay << endl;
+    cout << "\tGross Pay       : P " << grossPay << endl;
+    cout << "\t----------------------------------------------------" << endl;
+    cout << "\t           D E D U C T I O N S" << endl;
+    cout << "\t----------------------------------------------------" << endl;
+    cout << "\tSSS        (5%) : P " << sssDeduction << endl;
+    cout << "\tPhilHealth(2.5%): P " << philhealthDeduction << endl;
+    cout << "\tPag-IBIG        : P " << pagibigDeduction << endl;
+    cout << "\tLoan            : P " << loanDeduction << endl;
+    cout << "\tCash Advance    : P " << advanceFee << endl;
+    cout << "\t----------------------------------------------------" << endl;
+    cout << "\tTotal Deductions: P " << totalDeductions << endl;
+    cout << "\t====================================================" << endl;
+    cout << "\tNet Pay         : P " << netPay << endl;
+    cout << "\t====================================================" << endl;
+    cout << "\tF I N A L   P A Y M E N T : P " << netPay << endl;
+    cout << "\t====================================================" << endl;
+
+    // Confirm save
+    char confirm;
+    while (true) {
+        cout << "\n\tSave this payroll record? (y/n): ";
+        cin >> confirm;
+        if (confirm == 'y' || confirm == 'Y') {
+            fstream payFile;
+            payFile.open("payroll.txt", ios::app);
+            payFile << employees[empIdx].id << endl;
+            payFile << employees[empIdx].fullName << endl;
+            payFile << employees[empIdx].position << endl;
+            payFile << rate << endl;
+            payFile << hoursWorked << endl;
+            payFile << overtimeHours << endl;
+            payFile << overtimePay << endl;
+            payFile << grossPay << endl;
+            payFile << sssDeduction << endl;
+            payFile << philhealthDeduction << endl;
+            payFile << pagibigDeduction << endl;
+            payFile << loanDeduction << endl;
+            payFile << advanceFee << endl;
+            payFile << totalDeductions << endl;
+            payFile << netPay << endl;
+            payFile << attendances[attIdx].date << endl;
+            payFile.close();
+            cout << "\n\tPayroll record saved successfully!" << endl;
+            break;
+        } else if (confirm == 'n' || confirm == 'N') {
+            cout << "\n\tPayroll record not saved." << endl;
+            break;
+        } else {
+            cout << "\n\tInvalid input! Please Try Again." << endl;
+        }
+    }
+
+    staffMenu();
+}
+
+void staffGeneratePayslip() {
+    readDataPayroll();
+
+    cout << "\n\t-------------------------------------------\n";
+    cout << "\t|   G E N E R A T E   P A Y S L I P       |\n";
+    cout << "\t-------------------------------------------\n";
+
+    int empId;
+    cout << "\n\tEnter Employee ID: ";
+    cin >> empId;
+
+    // Find latest payroll for this employee
+    bool found = false;
+    int payIdx = -1;
+    for (int i = payrollCount - 1; i >= 0; i--) {
+        if (payrolls[i].employeeId == empId) {
+            found = true;
+            payIdx = i;
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "\n\tNo payroll record found for this employee!" << endl;
+        cout << "\tPlease compute salary first." << endl;
+        staffMenu();
+        return;
+    }
+
+    clrscrn();
+
+    cout << "\n\t====================================================" << endl;
+    cout << "\t|           E M P L O Y E E   P A Y S L I P        |" << endl;
+    cout << "\t====================================================" << endl;
+    cout << "\t| Employee ID     : " << payrolls[payIdx].employeeId << endl;
+    cout << "\t| Employee Name   : " << payrolls[payIdx].employeeName << endl;
+    cout << "\t| Position        : " << payrolls[payIdx].position << endl;
+    cout << "\t| Pay Period      : " << payrolls[payIdx].date << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t|            E A R N I N G S" << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t| Rate/Hour       : P " << fixed << setprecision(2) << payrolls[payIdx].rate << endl;
+    cout << "\t| Hours Worked    : " << payrolls[payIdx].hoursWorked << endl;
+    cout << "\t| Overtime Hours  : " << payrolls[payIdx].overtimeHours << endl;
+    cout << "\t| Overtime Pay    : P " << payrolls[payIdx].overtimePay << endl;
+    cout << "\t| Gross Pay       : P " << payrolls[payIdx].grossPay << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t|            D E D U C T I O N S" << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t| SSS        (5%) : P " << payrolls[payIdx].sssDeduction << endl;
+    cout << "\t| PhilHealth(2.5%): P " << payrolls[payIdx].philhealthDeduction << endl;
+    cout << "\t| Pag-IBIG        : P " << payrolls[payIdx].pagibigDeduction << endl;
+    cout << "\t| Loan            : P " << payrolls[payIdx].loanDeduction << endl;
+    cout << "\t| Cash Advance    : P " << payrolls[payIdx].advanceFee << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t| Total Deductions: P " << payrolls[payIdx].totalDeductions << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t| Net Pay         : P " << payrolls[payIdx].netPay << endl;
+    cout << "\t====================================================" << endl;
+    cout << "\t| F I N A L   P A Y M E N T : P " << payrolls[payIdx].netPay << endl;
+    cout << "\t====================================================" << endl;
+
+    staffMenu();
+}
 void employeeMenu() {
     cout << "\n\t+--------------------------------------+\n";
     cout << "\t|  E M P L O Y E E   D A S H B O A R D |\n";
     cout << "\t+--------------------------------------+\n";
     cout << "\n\t[1] View Salary Information" << endl;
     cout << "\t[2] Print Payslip" << endl;
-    cout << "\t[4] Security" << endl;
+    cout << "\t[3] Security" << endl;
     cout << "\t[0] Logout" << endl;
     cout << "\n\tChoice: ";
     char choice;
