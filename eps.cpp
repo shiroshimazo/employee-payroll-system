@@ -14,6 +14,7 @@ void employeeMenu(string loggedInUser);
 void updatePersonalInfo(string loggedInUser);
 void inputAttendance(), computeSalary(), staffGeneratePayslip();
 void readDataAttendance(), readDataPayroll();
+void payrollReports(), viewAllPayrolls(), viewPayrollByEmployee(), payrollSummaryReport(), deductionSummaryReport();
 
 struct Employee {
     int id;
@@ -1028,6 +1029,8 @@ void deleteStaff() {
     staffsRec();
 }
 
+void payrollReports();
+
 void adminMenu() {
     cout << "\n\t+--------------------------------+\n";
     cout << "\t|  A D M I N   D A S H B O A R D |\n";
@@ -1050,7 +1053,7 @@ void adminMenu() {
             staffsRec();
             break;
         case '3':
-            
+            payrollReports();
             break;
         case '0':
             char confirm;
@@ -1074,6 +1077,253 @@ void adminMenu() {
             adminMenu();
             break;
     }
+}
+
+void payrollReports() {
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t|   P A Y R O L L   R E P O R T S  |\n";
+    cout << "\t+----------------------------------+\n";
+    cout << "\n\t[1] View All Payrolls" << endl;
+    cout << "\t[2] View Payroll by Employee" << endl;
+    cout << "\t[3] Payroll Summary Report" << endl;
+    cout << "\t[4] Deduction Summary Report" << endl;
+    cout << "\t[0] Back" << endl;
+    cout << "\n\tChoice: ";
+    char choice;
+    cin >> choice;
+
+    clrscrn();
+
+    switch(choice) {
+        case '1':
+            viewAllPayrolls();
+            break;
+        case '2':
+            viewPayrollByEmployee();
+            break;
+        case '3':
+            payrollSummaryReport();
+            break;
+        case '4':
+            deductionSummaryReport();
+            break;
+        case '0':
+            adminMenu();
+            break;
+        default:
+            cout << "\n\tInvalid Choice! Please Try Again." << endl;
+            payrollReports();
+            break;
+    }
+}
+
+void viewAllPayrolls() {
+    readDataPayroll();
+    
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t|    A L L   P A Y R O L L S       |\n";
+    cout << "\t+----------------------------------+\n";
+    
+    if(payrollCount == 0) {
+        cout << "\n\tNo payroll records found!" << endl;
+        cout << "\n\tPress any key to go back...";
+        cin.ignore();
+        cin.get();
+        clrscrn();
+        payrollReports();
+        return;
+    }
+    
+    cout << "\n\t" << setfill('=') << setw(120) << "=" << setfill(' ') << endl;
+    cout << "\t" << left << setw(8) << "ID" << setw(20) << "NAME" 
+         << setw(15) << "POSITION" << setw(12) << "RATE"
+         << setw(15) << "GROSS PAY" << setw(18) << "DEDUCTIONS" 
+         << setw(15) << "NET PAY" << setw(15) << "PERIOD" << endl;
+    cout << "\t" << setfill('-') << setw(120) << "-" << setfill(' ') << endl;
+    
+    for(int i = 0; i < payrollCount; i++) {
+        cout << "\t" << left << setw(8) << payrolls[i].employeeId 
+             << setw(20) << payrolls[i].employeeName
+             << setw(15) << payrolls[i].position 
+             << "P " << fixed << setprecision(2) << setw(10) << payrolls[i].rate
+             << "P " << fixed << setprecision(2) << setw(13) << payrolls[i].grossPay
+             << "P " << fixed << setprecision(2) << setw(16) << payrolls[i].totalDeductions
+             << "P " << fixed << setprecision(2) << setw(13) << payrolls[i].netPay
+             << payrolls[i].date << endl;
+    }
+    
+    cout << "\t" << setfill('=') << setw(120) << "=" << setfill(' ') << endl;
+    cout << "\n\tTotal Records: " << payrollCount << endl;
+    
+    cout << "\n\tPress any key to go back...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    payrollReports();
+}
+
+void viewPayrollByEmployee() {
+    readDataPayroll();
+    readDataEmployees();
+    
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t|  P A Y R O L L   B Y   E M P L O Y E E  |\n";
+    cout << "\t+----------------------------------+\n";
+    
+    int empId;
+    cout << "\n\tEnter Employee ID: ";
+    cin >> empId;
+    
+    clrscrn();
+    
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t|  PAYROLL RECORDS FOR EMPLOYEE ID: " << empId << "\n";
+    cout << "\t+----------------------------------+\n";
+    
+    bool found = false;
+    
+    cout << "\n\t" << setfill('=') << setw(120) << "=" << setfill(' ') << endl;
+    cout << "\t" << left << setw(8) << "ID" << setw(20) << "NAME" 
+         << setw(15) << "POSITION" << setw(12) << "RATE"
+         << setw(15) << "GROSS PAY" << setw(18) << "DEDUCTIONS" 
+         << setw(15) << "NET PAY" << setw(15) << "PERIOD" << endl;
+    cout << "\t" << setfill('-') << setw(120) << "-" << setfill(' ') << endl;
+    
+    for(int i = 0; i < payrollCount; i++) {
+        if(payrolls[i].employeeId == empId) {
+            found = true;
+            cout << "\t" << left << setw(8) << payrolls[i].employeeId 
+                 << setw(20) << payrolls[i].employeeName
+                 << setw(15) << payrolls[i].position 
+                 << "P " << fixed << setprecision(2) << setw(10) << payrolls[i].rate
+                 << "P " << fixed << setprecision(2) << setw(13) << payrolls[i].grossPay
+                 << "P " << fixed << setprecision(2) << setw(16) << payrolls[i].totalDeductions
+                 << "P " << fixed << setprecision(2) << setw(13) << payrolls[i].netPay
+                 << payrolls[i].date << endl;
+        }
+    }
+    
+    cout << "\t" << setfill('=') << setw(120) << "=" << setfill(' ') << endl;
+    
+    if(!found) {
+        cout << "\n\tNo payroll records found for this employee!" << endl;
+    }
+    
+    cout << "\n\tPress any key to go back...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    payrollReports();
+}
+
+void payrollSummaryReport() {
+    readDataPayroll();
+    
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t| P A Y R O L L   S U M M A R Y    |\n";
+    cout << "\t+----------------------------------+\n";
+    
+    if(payrollCount == 0) {
+        cout << "\n\tNo payroll records found!" << endl;
+        cout << "\n\tPress any key to go back...";
+        cin.ignore();
+        cin.get();
+        clrscrn();
+        payrollReports();
+        return;
+    }
+    
+    double totalGross = 0, totalDeductions = 0, totalNetPay = 0;
+    double totalSSS = 0, totalPhilhealth = 0, totalPagibig = 0;
+    double totalLoan = 0, totalAdvance = 0;
+    
+    for(int i = 0; i < payrollCount; i++) {
+        totalGross += payrolls[i].grossPay;
+        totalDeductions += payrolls[i].totalDeductions;
+        totalNetPay += payrolls[i].netPay;
+        totalSSS += payrolls[i].sssDeduction;
+        totalPhilhealth += payrolls[i].philhealthDeduction;
+        totalPagibig += payrolls[i].pagibigDeduction;
+        totalLoan += payrolls[i].loanDeduction;
+        totalAdvance += payrolls[i].advanceFee;
+    }
+    
+    cout << "\n\t" << setfill('=') << setw(60) << "=" << setfill(' ') << endl;
+    cout << "\n\tPayroll Summary Report" << endl;
+    cout << "\tTotal Employees: " << payrollCount << endl;
+    
+    cout << "\n\t" << setfill('-') << setw(60) << "-" << setfill(' ') << endl;
+    cout << "\n\tGROSS PAYROLL:" << endl;
+    cout << "\t  Total Gross Pay: P " << fixed << setprecision(2) << totalGross << endl;
+    cout << "\t  Average Per Employee: P " << fixed << setprecision(2) << (totalGross / payrollCount) << endl;
+    
+    cout << "\n\t" << setfill('-') << setw(60) << "-" << setfill(' ') << endl;
+    cout << "\n\tDEDUCTIONS BREAKDOWN:" << endl;
+    cout << "\t  SSS: P " << fixed << setprecision(2) << totalSSS << endl;
+    cout << "\t  PhilHealth: P " << fixed << setprecision(2) << totalPhilhealth << endl;
+    cout << "\t  PagIBIG: P " << fixed << setprecision(2) << totalPagibig << endl;
+    cout << "\t  Loan: P " << fixed << setprecision(2) << totalLoan << endl;
+    cout << "\t  Advance: P " << fixed << setprecision(2) << totalAdvance << endl;
+    cout << "\t  Total Deductions: P " << fixed << setprecision(2) << totalDeductions << endl;
+    
+    cout << "\n\t" << setfill('=') << setw(60) << "=" << setfill(' ') << endl;
+    cout << "\n\tTOTAL NET PAY: P " << fixed << setprecision(2) << totalNetPay << endl;
+    cout << "\t" << setfill('=') << setw(60) << "=" << setfill(' ') << endl;
+    
+    cout << "\n\tPress any key to go back...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    payrollReports();
+}
+
+void deductionSummaryReport() {
+    readDataPayroll();
+    
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t| D E D U C T I O N   S U M M A R Y |\n";
+    cout << "\t+----------------------------------+\n";
+    
+    if(payrollCount == 0) {
+        cout << "\n\tNo payroll records found!" << endl;
+        cout << "\n\tPress any key to go back...";
+        cin.ignore();
+        cin.get();
+        clrscrn();
+        payrollReports();
+        return;
+    }
+    
+    cout << "\n\t" << setfill('=') << setw(110) << "=" << setfill(' ') << endl;
+    cout << "\t" << left << setw(8) << "ID" << setw(20) << "NAME" 
+         << setw(15) << "SSS" << setw(15) << "PHILHEALTH"
+         << setw(12) << "PAGIBIG" << setw(12) << "LOAN" 
+         << setw(12) << "ADVANCE" << setw(15) << "TOTAL" << endl;
+    cout << "\t" << setfill('-') << setw(110) << "-" << setfill(' ') << endl;
+    
+    double totalAllDeductions = 0;
+    
+    for(int i = 0; i < payrollCount; i++) {
+        cout << "\t" << left << setw(8) << payrolls[i].employeeId 
+             << setw(20) << payrolls[i].employeeName
+             << "P " << fixed << setprecision(2) << setw(12) << payrolls[i].sssDeduction
+             << "P " << fixed << setprecision(2) << setw(13) << payrolls[i].philhealthDeduction
+             << "P " << fixed << setprecision(2) << setw(10) << payrolls[i].pagibigDeduction
+             << "P " << fixed << setprecision(2) << setw(10) << payrolls[i].loanDeduction
+             << "P " << fixed << setprecision(2) << setw(10) << payrolls[i].advanceFee
+             << "P " << fixed << setprecision(2) << setw(13) << payrolls[i].totalDeductions << endl;
+        totalAllDeductions += payrolls[i].totalDeductions;
+    }
+    
+    cout << "\t" << setfill('=') << setw(110) << "=" << setfill(' ') << endl;
+    cout << "\tTOTAL DEDUCTIONS: P " << fixed << setprecision(2) << totalAllDeductions << endl;
+    cout << "\t" << setfill('=') << setw(110) << "=" << setfill(' ') << endl;
+    
+    cout << "\n\tPress any key to go back...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    payrollReports();
 }
 
 void staffMenu() {
@@ -1249,7 +1499,6 @@ void computeSalary() {
     cout << "\n\tEnter Employee ID: ";
     cin >> empId;
 
-    // Find employee
     bool foundEmp = false;
     int empIdx = -1;
     for (int i = 0; i < employeeCount; i++) {
@@ -1266,7 +1515,6 @@ void computeSalary() {
         return;
     }
 
-    // Show all attendance records for this employee
     cout << "\n\tAttendance records for " << employees[empIdx].fullName << ":" << endl;
     cout << "\n\t+-----+---------------------+---------------+---------------+" << endl;
     cout << "\t| " << left << setw(3) << "No."
@@ -1296,7 +1544,6 @@ void computeSalary() {
         return;
     }
 
-    // Let staff pick which pay period to compute
     int selection;
     cout << "\n\tSelect Pay Period to compute (enter number): ";
     cin >> selection;
@@ -1311,7 +1558,6 @@ void computeSalary() {
 
     clrscrn();
 
-    // ===== COMPUTE PAYROLL =====
     double rate = employees[empIdx].rate;
     double hoursWorked = attendances[attIdx].hoursWorked;
     double overtimeHours = attendances[attIdx].overtimeHours;
@@ -1319,7 +1565,6 @@ void computeSalary() {
     double overtimePay = overtimeHours * (rate * 1.25);
     double grossPay = (rate * hoursWorked) + overtimePay;
 
-    // === GOVERNMENT DEDUCTIONS ===
     double sssDeduction = grossPay * 0.05;
     double philhealthDeduction = grossPay * 0.025;
     double pagibigDeduction = 200.00;
@@ -1327,11 +1572,9 @@ void computeSalary() {
         pagibigDeduction = grossPay * 0.01;
     }
 
-    // === LOAN & ADVANCE FEE ===
     double loanDeduction = 0;
     double advanceFee = 0;
 
-    // Display initial computation
     cout << "\n\t====================================================" << endl;
     cout << "\t         S A L A R Y   C O M P U T A T I O N" << endl;
     cout << "\t====================================================" << endl;
@@ -1352,7 +1595,6 @@ void computeSalary() {
     cout << "\tPhilHealth(2.5%): P " << philhealthDeduction << endl;
     cout << "\tPag-IBIG        : P " << pagibigDeduction << endl;
 
-    // Ask for loan
     char hasLoan;
     while (true) {
         cout << "\n\tDoes this employee have a loan deduction? (y/n): ";
@@ -1368,7 +1610,6 @@ void computeSalary() {
         }
     }
 
-    // Ask for advance fee
     char hasAdvance;
     while (true) {
         cout << "\n\tDoes this employee have a cash advance deduction? (y/n): ";
@@ -1384,13 +1625,11 @@ void computeSalary() {
         }
     }
 
-    // === FINAL COMPUTATION ===
     double totalDeductions = sssDeduction + philhealthDeduction + pagibigDeduction + loanDeduction + advanceFee;
     double netPay = grossPay - totalDeductions;
 
     clrscrn();
 
-    // === DISPLAY FINAL PAYROLL RECEIPT ===
     cout << "\n\t====================================================" << endl;
     cout << "\t         S A L A R Y   C O M P U T A T I O N" << endl;
     cout << "\t====================================================" << endl;
@@ -1420,7 +1659,6 @@ void computeSalary() {
     cout << "\tF I N A L   P A Y M E N T : P " << netPay << endl;
     cout << "\t====================================================" << endl;
 
-    // Confirm save
     char confirm;
     while (true) {
         cout << "\n\tSave this payroll record? (y/n): ";
@@ -1469,7 +1707,7 @@ void staffGeneratePayslip() {
     cout << "\n\tEnter Employee ID: ";
     cin >> empId;
 
-    // Find latest payroll for this employee
+
     bool found = false;
     int payIdx = -1;
     for (int i = payrollCount - 1; i >= 0; i--) {
@@ -1571,11 +1809,131 @@ void employeeMenu() {
 }
 
 void viewSalaryInfo() {
-
+    readDataPayroll();
+    
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t| V I E W  S A L A R Y  I N F O    |\n";
+    cout << "\t+----------------------------------+\n";
+    
+    bool found = false;
+    
+    for(int i = 0; i < payrollCount; i++) {
+        // Find payroll record matching logged-in employee
+        if(payrolls[i].employeeName != "") {
+            // Get employee details from employees array
+            for(int j = 0; j < employeeCount; j++) {
+                if(employees[j].username == loggedInUser) {
+                    if(payrolls[i].employeeId == employees[j].id) {
+                        found = true;
+                        cout << "\n\t+-------- SALARY INFORMATION --------+\n";
+                        cout << "\n\tEmployee ID: " << payrolls[i].employeeId << endl;
+                        cout << "\tEmployee Name: " << payrolls[i].employeeName << endl;
+                        cout << "\tPosition: " << payrolls[i].position << endl;
+                        cout << "\tHourly Rate: P " << fixed << setprecision(2) << payrolls[i].rate << endl;
+                        
+                        cout << "\n\t+---------- WORK DETAILS -----------+\n";
+                        cout << "\tHours Worked: " << payrolls[i].hoursWorked << " hours" << endl;
+                        cout << "\tOvertime Hours: " << payrolls[i].overtimeHours << " hours" << endl;
+                        cout << "\tOvertime Pay: P " << fixed << setprecision(2) << payrolls[i].overtimePay << endl;
+                        
+                        cout << "\n\t+---------- SALARY SUMMARY ---------+\n";
+                        cout << "\tGross Pay: P " << fixed << setprecision(2) << payrolls[i].grossPay << endl;
+                        
+                        cout << "\n\t+--------- DEDUCTIONS -----------+\n";
+                        cout << "\tSSS Deduction: P " << fixed << setprecision(2) << payrolls[i].sssDeduction << endl;
+                        cout << "\tPhilHealth Deduction: P " << fixed << setprecision(2) << payrolls[i].philhealthDeduction << endl;
+                        cout << "\tPagIBIG Deduction: P " << fixed << setprecision(2) << payrolls[i].pagibigDeduction << endl;
+                        cout << "\tLoan Deduction: P " << fixed << setprecision(2) << payrolls[i].loanDeduction << endl;
+                        cout << "\tAdvance Fee: P " << fixed << setprecision(2) << payrolls[i].advanceFee << endl;
+                        cout << "\tTotal Deductions: P " << fixed << setprecision(2) << payrolls[i].totalDeductions << endl;
+                        
+                        cout << "\n\t+------------- NET PAY ----------+\n";
+                        cout << "\tNet Pay: P " << fixed << setprecision(2) << payrolls[i].netPay << endl;
+                        
+                        cout << "\n\tPayroll Period: " << payrolls[i].date << endl;
+                        cout << "\n\t+----------------------------------+\n";
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    
+    if(!found) {
+        cout << "\n\tNo salary information found for your account." << endl;
+    }
+    
+    cout << "\n\tPress any key to go back...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    employeeMenu();
 }
 
 void printPayslip() {
-
+    readDataPayroll();
+    readDataEmployees();
+    
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t|     P R I N T  P A Y S L I P     |\n";
+    cout << "\t+----------------------------------+\n";
+    
+    bool found = false;
+    
+    for(int i = 0; i < payrollCount; i++) {
+        for(int j = 0; j < employeeCount; j++) {
+            if(employees[j].username == loggedInUser) {
+                if(payrolls[i].employeeId == employees[j].id) {
+                    found = true;
+                    
+                    cout << "\n\t" << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
+                    cout << "\n\t                    P A Y S L I P" << endl;
+                    cout << "\n\t" << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
+                    
+                    cout << "\n\tEmployee ID:        " << setw(30) << left << payrolls[i].employeeId << endl;
+                    cout << "\tEmployee Name:      " << setw(30) << left << payrolls[i].employeeName << endl;
+                    cout << "\tPosition:           " << setw(30) << left << payrolls[i].position << endl;
+                    cout << "\tPayroll Period:     " << setw(30) << left << payrolls[i].date << endl;
+                    
+                    cout << "\n\t" << setfill('-') << setw(50) << "-" << setfill(' ') << endl;
+                    cout << "\n\tHourly Rate:        P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].rate << endl;
+                    cout << "\tHours Worked:       " << setw(15) << right << payrolls[i].hoursWorked << " hrs" << endl;
+                    cout << "\tOvertime Hours:     " << setw(15) << right << payrolls[i].overtimeHours << " hrs" << endl;
+                    cout << "\tOvertime Pay:       P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].overtimePay << endl;
+                    cout << "\n\t" << setfill('-') << setw(50) << "-" << setfill(' ') << endl;
+                    cout << "\tGROSS PAY:          P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].grossPay << endl;
+                    
+                    cout << "\n\t" << setfill('-') << setw(50) << "-" << setfill(' ') << endl;
+                    cout << "\tDEDUCTIONS:" << endl;
+                    cout << "\t  SSS:               P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].sssDeduction << endl;
+                    cout << "\t  PhilHealth:        P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].philhealthDeduction << endl;
+                    cout << "\t  PagIBIG:           P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].pagibigDeduction << endl;
+                    cout << "\t  Loan:              P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].loanDeduction << endl;
+                    cout << "\t  Advance Fee:       P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].advanceFee << endl;
+                    cout << "\t" << setfill('-') << setw(50) << "-" << setfill(' ') << endl;
+                    cout << "\t  TOTAL DEDUCTIONS:  P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].totalDeductions << endl;
+                    
+                    cout << "\n\t" << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
+                    cout << "\tNET PAY:            P " << fixed << setprecision(2) << setw(15) << right << payrolls[i].netPay << endl;
+                    cout << "\t" << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
+                    
+                    cout << "\n\tGenerated on: " << __DATE__ << " at " << __TIME__ << endl;
+                    cout << "\n\t" << setfill('=') << setw(50) << "=" << setfill(' ') << endl;
+                }
+                break;
+            }
+        }
+    }
+    
+    if(!found) {
+        cout << "\n\tNo payslip found for your account." << endl;
+    }
+    
+    cout << "\n\tPress any key to go back...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    employeeMenu();
 }
 
 
