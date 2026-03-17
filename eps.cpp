@@ -1571,11 +1571,187 @@ void employeeMenu() {
 }
 
 void viewSalaryInfo() {
+    readDataEmployees();
+    readDataPayroll();
 
+    // Find the logged-in employee
+    int empIdx = -1;
+    for (int i = 0; i < employeeCount; i++) {
+        if (employees[i].username == loggedInUser) {
+            empIdx = i;
+            break;
+        }
+    }
+
+    if (empIdx == -1) {
+        cout << "\n\tEmployee record not found!" << endl;
+        employeeMenu();
+        return;
+    }
+
+    clrscrn();
+
+    cout << "\n\t====================================================" << endl;
+    cout << "\t|        S A L A R Y   I N F O R M A T I O N      |" << endl;
+    cout << "\t====================================================" << endl;
+    cout << "\t| Employee ID   : " << employees[empIdx].id << endl;
+    cout << "\t| Name          : " << employees[empIdx].fullName << endl;
+    cout << "\t| Position      : " << employees[empIdx].position << endl;
+    cout << "\t| Rate/Hour     : P " << fixed << setprecision(2) << employees[empIdx].rate << endl;
+    cout << "\t====================================================" << endl;
+
+    // Collect matching payroll records
+    int matchCount = 0;
+    int matchIndexes[100];
+    for (int i = 0; i < payrollCount && matchCount < 100; i++) {
+        if (payrolls[i].employeeId == employees[empIdx].id) {
+            matchIndexes[matchCount++] = i;
+        }
+    }
+
+    if (matchCount == 0) {
+        cout << "\n\tNo payroll records found." << endl;
+        cout << "\n\tPress Enter to go back...";
+        cin.ignore();
+        cin.get();
+        employeeMenu();
+        return;
+    }
+
+    cout << "\n\t+-----+---------------------+---------------+---------------+-----------------+-----------------+" << endl;
+    cout << "\t| " << left << setw(3) << "No."
+         << " | " << setw(19) << "Pay Period"
+         << " | " << setw(13) << "Gross Pay"
+         << " | " << setw(13) << "Deductions"
+         << " | " << setw(15) << "Net Pay"
+         << " |" << endl;
+    cout << "\t+-----+---------------------+---------------+---------------+-----------------+-----------------+" << endl;
+
+    for (int i = 0; i < matchCount; i++) {
+        int idx = matchIndexes[i];
+        cout << "\t| " << left << setw(3) << (i + 1)
+             << " | " << setw(19) << payrolls[idx].date
+             << " | P " << setw(11) << fixed << setprecision(2) << payrolls[idx].grossPay
+             << " | P " << setw(11) << fixed << setprecision(2) << payrolls[idx].totalDeductions
+             << " | P " << setw(13) << fixed << setprecision(2) << payrolls[idx].netPay
+             << " |" << endl;
+    }
+    cout << "\t+-----+---------------------+---------------+---------------+-----------------+-----------------+" << endl;
+
+    cout << "\n\tPress Enter to go back...";
+    cin.ignore();
+    cin.get();
+    employeeMenu();
 }
 
 void printPayslip() {
+    readDataEmployees();
+    readDataPayroll();
 
+    // Find the logged-in employee
+    int empIdx = -1;
+    for (int i = 0; i < employeeCount; i++) {
+        if (employees[i].username == loggedInUser) {
+            empIdx = i;
+            break;
+        }
+    }
+
+    if (empIdx == -1) {
+        cout << "\n\tEmployee record not found!" << endl;
+        employeeMenu();
+        return;
+    }
+
+    // Collect matching payroll records
+    int matchCount = 0;
+    int matchIndexes[100];
+    for (int i = 0; i < payrollCount && matchCount < 100; i++) {
+        if (payrolls[i].employeeId == employees[empIdx].id) {
+            matchIndexes[matchCount++] = i;
+        }
+    }
+
+    if (matchCount == 0) {
+        cout << "\n\tNo payroll records found." << endl;
+        cout << "\n\tPress Enter to go back...";
+        cin.ignore();
+        cin.get();
+        employeeMenu();
+        return;
+    }
+
+    clrscrn();
+
+    cout << "\n\t-------------------------------------------\n";
+    cout << "\t|        P R I N T   P A Y S L I P        |\n";
+    cout << "\t-------------------------------------------\n";
+    cout << "\n\tAvailable Payslips:\n" << endl;
+    cout << "\t+-----+---------------------+" << endl;
+    cout << "\t| " << left << setw(3) << "No."
+         << " | " << setw(19) << "Pay Period" << " |" << endl;
+    cout << "\t+-----+---------------------+" << endl;
+
+    for (int i = 0; i < matchCount; i++) {
+        cout << "\t| " << left << setw(3) << (i + 1)
+             << " | " << setw(19) << payrolls[matchIndexes[i]].date << " |" << endl;
+    }
+    cout << "\t+-----+---------------------+" << endl;
+
+    int selection;
+    cout << "\n\tSelect Payslip (enter number, 0 to go back): ";
+    cin >> selection;
+
+    if (selection == 0) {
+        employeeMenu();
+        return;
+    }
+
+    if (selection < 1 || selection > matchCount) {
+        cout << "\n\tInvalid selection!" << endl;
+        printPayslip();
+        return;
+    }
+
+    int payIdx = matchIndexes[selection - 1];
+
+    clrscrn();
+
+    cout << "\n\t====================================================" << endl;
+    cout << "\t|           E M P L O Y E E   P A Y S L I P        |" << endl;
+    cout << "\t====================================================" << endl;
+    cout << "\t| Employee ID     : " << payrolls[payIdx].employeeId << endl;
+    cout << "\t| Employee Name   : " << payrolls[payIdx].employeeName << endl;
+    cout << "\t| Position        : " << payrolls[payIdx].position << endl;
+    cout << "\t| Pay Period      : " << payrolls[payIdx].date << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t|            E A R N I N G S" << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t| Rate/Hour       : P " << fixed << setprecision(2) << payrolls[payIdx].rate << endl;
+    cout << "\t| Hours Worked    : " << payrolls[payIdx].hoursWorked << endl;
+    cout << "\t| Overtime Hours  : " << payrolls[payIdx].overtimeHours << endl;
+    cout << "\t| Overtime Pay    : P " << payrolls[payIdx].overtimePay << endl;
+    cout << "\t| Gross Pay       : P " << payrolls[payIdx].grossPay << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t|            D E D U C T I O N S" << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t| SSS        (5%) : P " << payrolls[payIdx].sssDeduction << endl;
+    cout << "\t| PhilHealth(2.5%): P " << payrolls[payIdx].philhealthDeduction << endl;
+    cout << "\t| Pag-IBIG        : P " << payrolls[payIdx].pagibigDeduction << endl;
+    cout << "\t| Loan            : P " << payrolls[payIdx].loanDeduction << endl;
+    cout << "\t| Cash Advance    : P " << payrolls[payIdx].advanceFee << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t| Total Deductions: P " << payrolls[payIdx].totalDeductions << endl;
+    cout << "\t|----------------------------------------------------" << endl;
+    cout << "\t| Net Pay         : P " << payrolls[payIdx].netPay << endl;
+    cout << "\t====================================================" << endl;
+    cout << "\t| F I N A L   P A Y M E N T : P " << payrolls[payIdx].netPay << endl;
+    cout << "\t====================================================" << endl;
+
+    cout << "\n\tPress Enter to go back...";
+    cin.ignore();
+    cin.get();
+    employeeMenu();
 }
 
 
