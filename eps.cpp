@@ -87,11 +87,18 @@ void readDataAttendance() {
     attendanceCount = 0;
     string line;
     while(getline(readAtt, line)) {
-        attendances[attendanceCount].employeeId = stoi(line);
+        if(line.empty()) continue;
+        try {
+            attendances[attendanceCount].employeeId = stoi(line);
+        } catch(...) {
+            continue;
+        }
         getline(readAtt, attendances[attendanceCount].employeeName);
         getline(readAtt, line);
+        if(line.empty()) continue;
         attendances[attendanceCount].hoursWorked = stod(line);
         getline(readAtt, line);
+        if(line.empty()) continue;
         attendances[attendanceCount].overtimeHours = stod(line);
         getline(readAtt, attendances[attendanceCount].date);
         attendanceCount++;
@@ -104,33 +111,65 @@ void readDataPayroll() {
     payrollCount = 0;
     string line;
     while(getline(readPay, line)) {
-        payrolls[payrollCount].employeeId = stoi(line);
+        if(line.empty()) continue;
+        
+        try {
+            payrolls[payrollCount].employeeId = stoi(line);
+        } catch(...) {
+            continue;
+        }
+        
         getline(readPay, payrolls[payrollCount].employeeName);
         getline(readPay, payrolls[payrollCount].position);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].rate = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].hoursWorked = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].overtimeHours = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].overtimePay = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].grossPay = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].sssDeduction = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].philhealthDeduction = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].pagibigDeduction = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].loanDeduction = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].advanceFee = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].totalDeductions = stod(line);
+        
         getline(readPay, line);
+        if(line.empty()) continue;
         payrolls[payrollCount].netPay = stod(line);
+        
         getline(readPay, payrolls[payrollCount].date);
         payrollCount++;
     }
@@ -142,7 +181,12 @@ void readDataEmployees() {
     employeeCount = 0;
     string line;
     while(getline(readEmp, line)) {
-        employees[employeeCount].id = stoi(line);
+        if(line.empty()) continue;
+        try {
+            employees[employeeCount].id = stoi(line);
+        } catch(...) {
+            continue;
+        }
         getline(readEmp, employees[employeeCount].username);
         getline(readEmp, employees[employeeCount].password);
         getline(readEmp, employees[employeeCount].fullName);
@@ -155,6 +199,7 @@ void readDataEmployees() {
         getline(readEmp, employees[employeeCount].philhealthNumber);
         getline(readEmp, employees[employeeCount].pagibigNumber);
         getline(readEmp, line);
+        if(line.empty()) continue;
         employees[employeeCount].rate = stod(line);
         employeeCount++;
     }
@@ -166,7 +211,12 @@ void readDataStaff() {
     staffCount = 0;
     string line;
     while (getline(readStaff, line)) {
-        staffs[staffCount].id = stoi(line);
+        if(line.empty()) continue;
+        try {
+            staffs[staffCount].id = stoi(line);
+        } catch(...) {
+            continue;
+        }
         getline(readStaff, staffs[staffCount].username);
         getline(readStaff, staffs[staffCount].password);
         getline(readStaff, staffs[staffCount].fullName);
