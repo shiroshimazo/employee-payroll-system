@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <vector>
 using namespace std;
 
 void adminMenu(), staffMenu(), employeeMenu(), userAuthentication();
@@ -14,7 +15,7 @@ void employeeMenu(string loggedInUser);
 void updatePersonalInfo(string loggedInUser);
 void inputAttendance(), computeSalary(), staffGeneratePayslip();
 void readDataAttendance(), readDataPayroll();
-void payrollReports(), viewAllPayrolls(), viewPayrollByEmployee(), payrollSummaryReport(), deductionSummaryReport();
+void payrollReports(), viewAllPayrolls(), viewPayrollByEmployee(), payrollSummaryReport(), deductionSummaryReport(), payrollByDateReport();
 
 struct Employee {
     int id;
@@ -97,10 +98,18 @@ void readDataAttendance() {
         getline(readAtt, attendances[attendanceCount].employeeName);
         getline(readAtt, line);
         if(line.empty()) continue;
-        attendances[attendanceCount].hoursWorked = stod(line);
+        try {
+            attendances[attendanceCount].hoursWorked = stod(line);
+        } catch(...) {
+            continue;
+        }
         getline(readAtt, line);
         if(line.empty()) continue;
-        attendances[attendanceCount].overtimeHours = stod(line);
+        try {
+            attendances[attendanceCount].overtimeHours = stod(line);
+        } catch(...) {
+            continue;
+        }
         getline(readAtt, attendances[attendanceCount].date);
         attendanceCount++;
     }
@@ -125,51 +134,99 @@ void readDataPayroll() {
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].rate = stod(line);
+        try {
+            payrolls[payrollCount].rate = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].hoursWorked = stod(line);
+        try {
+            payrolls[payrollCount].hoursWorked = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].overtimeHours = stod(line);
+        try {
+            payrolls[payrollCount].overtimeHours = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].overtimePay = stod(line);
+        try {
+            payrolls[payrollCount].overtimePay = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].grossPay = stod(line);
+        try {
+            payrolls[payrollCount].grossPay = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].sssDeduction = stod(line);
+        try {
+            payrolls[payrollCount].sssDeduction = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].philhealthDeduction = stod(line);
+        try {
+            payrolls[payrollCount].philhealthDeduction = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].pagibigDeduction = stod(line);
+        try {
+            payrolls[payrollCount].pagibigDeduction = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].loanDeduction = stod(line);
+        try {
+            payrolls[payrollCount].loanDeduction = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].advanceFee = stod(line);
+        try {
+            payrolls[payrollCount].advanceFee = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].totalDeductions = stod(line);
+        try {
+            payrolls[payrollCount].totalDeductions = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, line);
         if(line.empty()) continue;
-        payrolls[payrollCount].netPay = stod(line);
+        try {
+            payrolls[payrollCount].netPay = stod(line);
+        } catch(...) {
+            continue;
+        }
         
         getline(readPay, payrolls[payrollCount].date);
         payrollCount++;
@@ -201,7 +258,11 @@ void readDataEmployees() {
         getline(readEmp, employees[employeeCount].pagibigNumber);
         getline(readEmp, line);
         if(line.empty()) continue;
-        employees[employeeCount].rate = stod(line);
+        try {
+            employees[employeeCount].rate = stod(line);
+        } catch(...) {
+            continue;
+        }
         employeeCount++;
     }
     readEmp.close(); 
@@ -1087,6 +1148,7 @@ void payrollReports() {
     cout << "\t[2] View Payroll by Employee" << endl;
     cout << "\t[3] Payroll Summary Report" << endl;
     cout << "\t[4] Deduction Summary Report" << endl;
+    cout << "\t[5] Payroll by Date/Month" << endl;
     cout << "\t[0] Back" << endl;
     cout << "\n\tChoice: ";
     char choice;
@@ -1106,6 +1168,9 @@ void payrollReports() {
             break;
         case '4':
             deductionSummaryReport();
+            break;
+        case '5':
+            payrollByDateReport();
             break;
         case '0':
             adminMenu();
@@ -1318,6 +1383,101 @@ void deductionSummaryReport() {
     cout << "\t" << setfill('=') << setw(110) << "=" << setfill(' ') << endl;
     cout << "\tTOTAL DEDUCTIONS: P " << fixed << setprecision(2) << totalAllDeductions << endl;
     cout << "\t" << setfill('=') << setw(110) << "=" << setfill(' ') << endl;
+    
+    cout << "\n\tPress any key to go back...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    payrollReports();
+}
+
+void payrollByDateReport() {
+    readDataPayroll();
+    
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t|  PAYROLL BY DATE/MONTH REPORT    |\n";
+    cout << "\t+----------------------------------+\n";
+    
+    if(payrollCount == 0) {
+        cout << "\n\tNo payroll records found!" << endl;
+        cout << "\n\tPress any key to go back...";
+        cin.ignore();
+        cin.get();
+        clrscrn();
+        payrollReports();
+        return;
+    }
+    
+    cout << "\n\tEnter Month Name (e.g., January, February, March...): ";
+    cin.ignore();
+    string searchMonth;
+    getline(cin, searchMonth);
+    
+    // Convert to lowercase for case-insensitive search
+    for(int i = 0; i < searchMonth.length(); i++) {
+        searchMonth[i] = tolower(searchMonth[i]);
+    }
+    
+    clrscrn();
+    
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t|  PAYROLL FOR " << searchMonth << endl;
+    cout << "\t+----------------------------------+\n";
+    
+    vector<int> matchingIndices;
+    for(int i = 0; i < payrollCount; i++) {
+        string dateStr = payrolls[i].date;
+        // Convert date string to lowercase for comparison
+        for(int j = 0; j < dateStr.length(); j++) {
+            dateStr[j] = tolower(dateStr[j]);
+        }
+        // Check if the search month is in the date
+        if(dateStr.find(searchMonth) != string::npos) {
+            matchingIndices.push_back(i);
+        }
+    }
+    
+    if(matchingIndices.size() == 0) {
+        cout << "\n\tNo payroll records found for " << searchMonth << "!" << endl;
+        cout << "\n\tPress any key to go back...";
+        cin.ignore();
+        cin.get();
+        clrscrn();
+        payrollReports();
+        return;
+    }
+    
+    cout << "\n\t" << setfill('=') << setw(120) << "=" << setfill(' ') << endl;
+    cout << "\t" << left << setw(8) << "ID" << setw(20) << "NAME" 
+         << setw(15) << "POSITION" << setw(12) << "RATE"
+         << setw(15) << "GROSS PAY" << setw(18) << "DEDUCTIONS" 
+         << setw(15) << "NET PAY" << setw(15) << "PERIOD" << endl;
+    cout << "\t" << setfill('-') << setw(120) << "-" << setfill(' ') << endl;
+    
+    double totalGross = 0, totalDeductions = 0, totalNetPay = 0;
+    
+    for(int idx : matchingIndices) {
+        cout << "\t" << left << setw(8) << payrolls[idx].employeeId 
+             << setw(20) << payrolls[idx].employeeName
+             << setw(15) << payrolls[idx].position 
+             << "P " << fixed << setprecision(2) << setw(10) << payrolls[idx].rate
+             << "P " << fixed << setprecision(2) << setw(13) << payrolls[idx].grossPay
+             << "P " << fixed << setprecision(2) << setw(16) << payrolls[idx].totalDeductions
+             << "P " << fixed << setprecision(2) << setw(13) << payrolls[idx].netPay
+             << payrolls[idx].date << endl;
+        
+        totalGross += payrolls[idx].grossPay;
+        totalDeductions += payrolls[idx].totalDeductions;
+        totalNetPay += payrolls[idx].netPay;
+    }
+    
+    cout << "\t" << setfill('=') << setw(120) << "=" << setfill(' ') << endl;
+    cout << "\n\tSummary for " << searchMonth << ":" << endl;
+    cout << "\tTotal Records: " << matchingIndices.size() << endl;
+    cout << "\tTotal Gross Pay: P " << fixed << setprecision(2) << totalGross << endl;
+    cout << "\tTotal Deductions: P " << fixed << setprecision(2) << totalDeductions << endl;
+    cout << "\tTotal Net Pay: P " << fixed << setprecision(2) << totalNetPay << endl;
+    cout << "\t" << setfill('=') << setw(120) << "=" << setfill(' ') << endl;
     
     cout << "\n\tPress any key to go back...";
     cin.ignore();
