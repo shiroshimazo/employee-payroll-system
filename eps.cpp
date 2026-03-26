@@ -3,7 +3,26 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
+#include <conio.h>
 using namespace std;
+
+string getPasswordInput() {
+    string password = "";
+    char ch;
+    while ((ch = _getch()) != 13) { // 13 is Enter key
+        if (ch == 8) { // Backspace
+            if (password.length() > 0) {
+                password.pop_back();
+                cout << "\b \b";
+            }
+        } else {
+            password += ch;
+            cout << "*";
+        }
+    }
+    cout << endl;
+    return password;
+}
 
 void adminMenu(), staffMenu(), employeeMenu(), userAuthentication();
 void readDataEmployees(), employeeRec(), addEmployee(), updateEmployee(), viewEmployee(), deleteEmployee();
@@ -354,7 +373,7 @@ void addEmployee() {
     cin.ignore();
     getline(cin, newEmp.username);
     cout << "\n\tEnter Password: ";
-    getline(cin, newEmp.password);
+    newEmp.password = getPasswordInput();
     cout << "\n\tEnter Full Name: ";
     getline(cin, newEmp.fullName);
     cout << "\n\tEnter Gender: ";
@@ -466,7 +485,7 @@ void updateEmployee() {
         case 2:
             cout << "\n\tEnter new Password: ";
             cin.ignore();
-            getline(cin, employees[idx].password);
+            employees[idx].password = getPasswordInput();
             cout << "\n\tPassword updated successfully!" << endl;
             validUpdate = true;
             break;
@@ -846,7 +865,7 @@ void addStaff() {
     cin.ignore();
     getline(cin, newStaff.username);
     cout << "\n\tEnter Password: ";
-    getline(cin, newStaff.password);
+    newStaff.password = getPasswordInput();
     cout << "\n\tEnter Full Name: ";
     getline(cin, newStaff.fullName);
     cout << "\n\tEnter Role: ";
@@ -985,7 +1004,7 @@ void updateStaff() {
                 break;
             case '2':
                 cout << "\n\tEnter New Password: ";
-                cin >> staffs[idx].password;
+                staffs[idx].password = getPasswordInput();
                 cout << "\n\tPassword updated successfully!" << endl;
                 validUpdate = true;
                 break;
@@ -2128,11 +2147,11 @@ void changePassword() {
     cout << "\n\tEnter Username: ";
     cin >> username;
     cout << "\n\tEnter Old Password: ";
-    cin >> oldPassword;
+    oldPassword = getPasswordInput();
 
     if(authenticateEmployee(username, oldPassword)) {
         cout << "\n\tEnter New Password: ";
-        cin >> newPassword;
+        newPassword = getPasswordInput();
 
         for(int i = 0; i < employeeCount; i++) {
             if(employees[i].username == username) {
@@ -2201,7 +2220,7 @@ void userAuthentication() {
         cout << "\n\tEnter Username: ";
         cin >> username;
         cout << "\n\tEnter Password: ";
-        cin >> password;
+        password = getPasswordInput();
 
         clrscrn();
 
