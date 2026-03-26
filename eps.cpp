@@ -2191,9 +2191,12 @@ void userAuthentication() {
     while(attempt != 0) {
         string username, password;
 
-        cout << "\n\t------------------------------\n";
-        cout << "\t|    L O G I N   P A N E L   |\n";
-        cout << "\t------------------------------\n";
+        cout << "\n\t----------------------------------\n";
+        cout << "\t|      L O G I N   P A N E L      |\n";
+        cout << "\t|    F U J I  F U R N I T U R E   |\n";
+        cout << "\t|          C++ Version 1.0        |\n";
+        cout << "\t|          Special Edition        |\n";
+        cout << "\t----------------------------------\n";
 
         cout << "\n\tEnter Username: ";
         cin >> username;
