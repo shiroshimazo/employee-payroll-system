@@ -4,13 +4,14 @@
 #include <iostream>
 #include <vector>
 #include <conio.h>
+#include <ctime>
 using namespace std;
 
 string getPasswordInput() {
     string password = "";
     char ch;
-    while ((ch = _getch()) != 13) { // 13 is Enter key
-        if (ch == 8) { // Backspace
+    while ((ch = _getch()) != 13) { 
+        if (ch == 8) {
             if (password.length() > 0) {
                 password.pop_back();
                 cout << "\b \b";
@@ -35,6 +36,9 @@ void updatePersonalInfo(string loggedInUser);
 void inputAttendance(), computeSalary(), staffGeneratePayslip();
 void readDataAttendance(), readDataPayroll();
 void payrollReports(), viewAllPayrolls(), viewPayrollByEmployee(), payrollSummaryReport(), deductionSummaryReport(), payrollByDateReport();
+void employeeClockInOut(string loggedInUser), viewMyTimesheet(string loggedInUser);
+void viewAllTimesheets(), viewTimesheetByEmployee(), readDataTimesheet();
+void generateAttendanceFromTimesheet(), viewGeneratedAttendance();
 
 struct Employee {
     int id;
@@ -87,10 +91,22 @@ struct Payroll {
     string date;
 };
 
+struct Timesheet {
+    int employeeId;
+    string employeeName;
+    string clockInTime;
+    string clockOutTime;
+    string date;
+    double hoursWorked;
+    string status; // Present, Absent, Late, Early Leave
+};
+
 Attendance attendances[100];
 Payroll payrolls[100];
+Timesheet timesheets[500];
 int attendanceCount = 0;
 int payrollCount = 0;
+int timesheetCount = 0;
 
 Employee employees[100];
 Staff staffs[100];
@@ -1117,7 +1133,8 @@ void adminMenu() {
     cout << "\t+--------------------------------+\n";
     cout << "\n\t[1] Manage Employee Records" << endl;
     cout << "\t[2] Manage Staff Accounts" << endl;
-    cout << "\t[3] Payroll Reports" << endl;
+    cout << "\t[3] View Timesheets" << endl;
+    cout << "\t[4] Payroll Reports" << endl;
     cout << "\t[0] Logout" << endl;
     cout << "\n\tChoice: ";
     char choice;
@@ -1133,6 +1150,9 @@ void adminMenu() {
             staffsRec();
             break;
         case '3':
+            viewAllTimesheets();
+            break;
+        case '4':
             payrollReports();
             break;
         case '0':
@@ -1509,9 +1529,10 @@ void staffMenu() {
     cout << "\n\t+----------------------------------+\n";
     cout << "\t|  S T A F F   D A S H B O A R D   |\n";
     cout << "\t+----------------------------------+\n";
-    cout << "\n\t[1] Input Employee Attendance" << endl;
-    cout << "\t[2] Compute Salary" << endl;
-    cout << "\t[3] Generate Payslip" << endl;
+    cout << "\n\t[1] Generate Attendance from Timesheet" << endl;
+    cout << "\t[2] View Generated Attendance" << endl;
+    cout << "\t[3] Compute Salary" << endl;
+    cout << "\t[4] Generate Payslip" << endl;
     cout << "\t[0] Logout" << endl;
     cout << "\n\tChoice: ";
     char choice;
@@ -1520,12 +1541,15 @@ void staffMenu() {
 
     switch(choice) {
         case '1':
-            inputAttendance();
+            generateAttendanceFromTimesheet();
             break;
         case '2':
-            computeSalary();
+            viewGeneratedAttendance();
             break;
         case '3':
+            computeSalary();
+            break;
+        case '4':
             staffGeneratePayslip();
             break;
         case '0':
@@ -1943,9 +1967,11 @@ void employeeMenu() {
     cout << "\n\t+--------------------------------------+\n";
     cout << "\t|  E M P L O Y E E   D A S H B O A R D |\n";
     cout << "\t+--------------------------------------+\n";
-    cout << "\n\t[1] View Salary Information" << endl;
-    cout << "\t[2] Print Payslip" << endl;
-    cout << "\t[3] Security" << endl;
+    cout << "\t[1] Clock In/Out (Timesheet)" << endl;
+    cout << "\t[2] View My Timesheet" << endl;
+    cout << "\t[3] View Salary Information" << endl;
+    cout << "\t[4] Print Payslip" << endl;
+    cout << "\t[5] Security" << endl;
     cout << "\t[0] Logout" << endl;
     cout << "\n\tChoice: ";
     char choice;
@@ -1955,12 +1981,18 @@ void employeeMenu() {
 
     switch(choice) {
         case '1':
-            viewSalaryInfo();
+            employeeClockInOut(loggedInUser);
             break;
         case '2':
-            printPayslip();
+            viewMyTimesheet(loggedInUser);
             break;
         case '3':
+            viewSalaryInfo();
+            break;
+        case '4':
+            printPayslip();
+            break;
+        case '5':
             employeeSecurity();
             break;
         case '0':
@@ -1997,9 +2029,7 @@ void viewSalaryInfo() {
     bool found = false;
     
     for(int i = 0; i < payrollCount; i++) {
-        // Find payroll record matching logged-in employee
         if(payrolls[i].employeeName != "") {
-            // Get employee details from employees array
             for(int j = 0; j < employeeCount; j++) {
                 if(employees[j].username == loggedInUser) {
                     if(payrolls[i].employeeId == employees[j].id) {
@@ -2247,4 +2277,617 @@ void userAuthentication() {
 
 void clrscrn() {
     system("cls");
+}
+
+string getCurrentTime() {
+    time_t now = time(0);
+    struct tm* timeinfo = localtime(&now);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%H:%M:%S", timeinfo);
+    return string(buffer);
+}
+
+string getCurrentDate() {
+    time_t now = time(0);
+    struct tm* timeinfo = localtime(&now);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d", timeinfo);
+    return string(buffer);
+}
+
+void readDataTimesheet() {
+    ifstream readTime("timesheet.txt");
+    timesheetCount = 0;
+    string line;
+    
+    while(getline(readTime, line)) {
+        if(line.empty()) continue;
+        try {
+            timesheets[timesheetCount].employeeId = stoi(line);
+        } catch(...) {
+            continue;
+        }
+        getline(readTime, timesheets[timesheetCount].employeeName);
+        getline(readTime, timesheets[timesheetCount].clockInTime);
+        getline(readTime, timesheets[timesheetCount].clockOutTime);
+        getline(readTime, timesheets[timesheetCount].date);
+        getline(readTime, line);
+        if(!line.empty()) {
+            try {
+                timesheets[timesheetCount].hoursWorked = stod(line);
+            } catch(...) {
+                timesheets[timesheetCount].hoursWorked = 0;
+            }
+        }
+        getline(readTime, timesheets[timesheetCount].status);
+        timesheetCount++;
+    }
+    readTime.close();
+}
+
+void employeeClockInOut(string loggedInUser) {
+    clrscrn();
+    cout << "\n\t+----------------------------------+\n";
+    cout << "\t| C L O C K   I N / O U T   S Y S T E M |\n";
+    cout << "\t+----------------------------------+\n";
+    
+    readDataEmployees();
+    readDataTimesheet();
+    
+    // Find employee ID from username
+    int empId = -1;
+    string empName = "";
+    for(int i = 0; i < employeeCount; i++) {
+        if(employees[i].username == loggedInUser) {
+            empId = employees[i].id;
+            empName = employees[i].fullName;
+            break;
+        }
+    }
+    
+    if(empId == -1) {
+        cout << "\n\tEmployee not found!" << endl;
+        return;
+    }
+    
+    string currentDate = getCurrentDate();
+    string currentTime = getCurrentTime();
+    
+    // Validation: Check today's attendance status
+    bool hasTimeIn = false;
+    bool hasTimeOut = false;
+    int lastIndex = -1;
+    
+    for(int i = 0; i < timesheetCount; i++) {
+        if(timesheets[i].employeeId == empId && timesheets[i].date == currentDate) {
+            lastIndex = i;
+            // Check if Time In exists
+            if(timesheets[i].clockInTime != "N/A" && timesheets[i].clockInTime != "") {
+                hasTimeIn = true;
+            }
+            // Check if Time Out exists
+            if(timesheets[i].clockOutTime != "N/A" && timesheets[i].clockOutTime != "") {
+                hasTimeOut = true;
+            }
+            break;
+        }
+    }
+    
+    cout << "\n\tEmployee: " << empName << endl;
+    cout << "\tDate: " << currentDate << endl;
+    cout << "\tCurrent Time: " << currentTime << endl;
+    cout << "\n";
+    
+    // Requirement 3: Both Time In and Time Out completed
+    if(hasTimeIn && hasTimeOut) {
+        clrscrn();
+        string displayTimeIn = (lastIndex >= 0) ? timesheets[lastIndex].clockInTime : "N/A";
+        string displayTimeOut = (lastIndex >= 0) ? timesheets[lastIndex].clockOutTime : "N/A";
+        
+        cout << "\n\t+----------------------------------+\n";
+        cout << "\t| ATTENDANCE ALREADY COMPLETED   |\n";
+        cout << "\t+----------------------------------+\n";
+        cout << "\t| You have already completed your |\n";
+        cout << "\t| attendance for today.           |\n";
+        cout << "\t|                                  |\n";
+        cout << "\t| Time In:  " << setw(20) << left << displayTimeIn << " |\n";
+        cout << "\t| Time Out: " << setw(20) << left << displayTimeOut << " |\n";
+        cout << "\t|                                  |\n";
+        cout << "\t| Please come back tomorrow.      |\n";
+        cout << "\t+----------------------------------+\n";
+        cout << "\n\tPress Enter to continue...";
+        cin.ignore();
+        cin.get();
+        clrscrn();
+        employeeMenu();
+        return;
+    }
+    
+    if(!hasTimeIn) {
+        cout << "\t+----------------------------------+\n";
+        cout << "\t| [1] Clock In                     |\n";
+        cout << "\t| [0] Cancel                       |\n";
+        cout << "\t+----------------------------------+\n";
+        cout << "\tChoice: ";
+        char choice;
+        cin >> choice;
+        
+        if(choice == '1') {
+            Timesheet newTimesheet;
+            newTimesheet.employeeId = empId;
+            newTimesheet.employeeName = empName;
+            newTimesheet.clockInTime = currentTime;
+            newTimesheet.clockOutTime = "N/A";
+            newTimesheet.date = currentDate;
+            newTimesheet.hoursWorked = 0.0;
+            newTimesheet.status = "Present";
+            
+            timesheets[timesheetCount] = newTimesheet;
+            timesheetCount++;
+            
+            ofstream timeRec("timesheet.txt", ios::app);
+            timeRec << newTimesheet.employeeId << endl;
+            timeRec << newTimesheet.employeeName << endl;
+            timeRec << newTimesheet.clockInTime << endl;
+            timeRec << newTimesheet.clockOutTime << endl;
+            timeRec << newTimesheet.date << endl;
+            timeRec << newTimesheet.hoursWorked << endl;
+            timeRec << newTimesheet.status << endl;
+            timeRec.close();
+            
+            clrscrn();
+            cout << "\n\t+----------------------------------+\n";
+            cout << "\t| SUCCESS: TIME IN RECORDED        |\n";
+            cout << "\t+----------------------------------+\n";
+            cout << "\t| Time: " << setw(24) << left << currentTime << " |\n";
+            cout << "\t| Status: CLOCKED IN               |\n";
+            cout << "\t| Remember to Clock Out!           |\n";
+            cout << "\t+----------------------------------+\n";
+        } else {
+            clrscrn();
+            employeeMenu();
+            return;
+        }
+    } 
+    // Requirement 2: Time Out validation
+    else if(hasTimeIn && !hasTimeOut) {
+        cout << "\t+----------------------------------+\n";
+        cout << "\t| [1] Clock Out                    |\n";
+        cout << "\t| [0] Cancel                       |\n";
+        cout << "\t+----------------------------------+\n";
+        cout << "\tChoice: ";
+        char choice;
+        cin >> choice;
+        
+        if(choice == '1') {
+            if(lastIndex >= 0) {
+                // Update the record with clock out time
+                timesheets[lastIndex].clockOutTime = currentTime;
+                
+                // Calculate hours worked
+                int inHour = stoi(timesheets[lastIndex].clockInTime.substr(0, 2));
+                int inMin = stoi(timesheets[lastIndex].clockInTime.substr(3, 2));
+                int outHour = stoi(currentTime.substr(0, 2));
+                int outMin = stoi(currentTime.substr(3, 2));
+                
+                double hoursWorked = (outHour - inHour) + (outMin - inMin) / 60.0;
+                timesheets[lastIndex].hoursWorked = hoursWorked;
+                
+                // Rewrite the entire timesheet file
+                ofstream timeRec("timesheet.txt");
+                for(int i = 0; i < timesheetCount; i++) {
+                    timeRec << timesheets[i].employeeId << endl;
+                    timeRec << timesheets[i].employeeName << endl;
+                    timeRec << timesheets[i].clockInTime << endl;
+                    timeRec << timesheets[i].clockOutTime << endl;
+                    timeRec << timesheets[i].date << endl;
+                    timeRec << timesheets[i].hoursWorked << endl;
+                    timeRec << timesheets[i].status << endl;
+                }
+                timeRec.close();
+                
+                clrscrn();
+                cout << "\n\t+----------------------------------+\n";
+                cout << "\t| SUCCESS: TIME OUT RECORDED       |\n";
+                cout << "\t+----------------------------------+\n";
+                cout << "\t| Time In:    " << setw(20) << left << timesheets[lastIndex].clockInTime << " |\n";
+                cout << "\t| Time Out:   " << setw(20) << left << currentTime << " |\n";
+                cout << "\t| Hours: " << setw(25) << left << fixed << setprecision(2) << hoursWorked << " |\n";
+                cout << "\t| Status: COMPLETE                 |\n";
+                cout << "\t+----------------------------------+\n";
+            }
+        } else {
+            clrscrn();
+            employeeMenu();
+            return;
+        }
+    }
+    
+    cout << "\n\tPress Enter to continue...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    employeeMenu();
+}
+
+void viewMyTimesheet(string loggedInUser) {
+    clrscrn();
+    cout << "\n\t+---------------------------+\n";
+    cout << "\t|  M Y   T I M E S H E E T  |\n";
+    cout << "\t+---------------------------+\n";
+    
+    readDataEmployees();
+    readDataTimesheet();
+    
+    // Find employee ID
+    int empId = -1;
+    for(int i = 0; i < employeeCount; i++) {
+        if(employees[i].username == loggedInUser) {
+            empId = employees[i].id;
+            break;
+        }
+    }
+    
+    if(empId == -1) {
+        cout << "\n\tEmployee not found!" << endl;
+        return;
+    }
+    
+    cout << "\n\t+-----+------------------+----------+----------+----------+----------+\n";
+    cout << "\t| " << left << setw(3) << "No" << " | " << setw(16) << "Date" << " | " << setw(8) << "Clock In" << " | " << setw(8) << "Clock Out" << " | " << setw(8) << "Hours" << " | " << setw(8) << "Status" << " |\n";
+    cout << "\t+-----+------------------+----------+----------+----------+----------+\n";
+    
+    int count = 0;
+    for(int i = 0; i < timesheetCount; i++) {
+        if(timesheets[i].employeeId == empId) {
+            count++;
+            cout << "\t| " << left << setw(3) << count << " | " << setw(16) << timesheets[i].date 
+                 << " | " << setw(8) << timesheets[i].clockInTime << " | " << setw(8) << timesheets[i].clockOutTime 
+                 << " | " << setw(8) << fixed << setprecision(2) << timesheets[i].hoursWorked 
+                 << " | " << setw(8) << timesheets[i].status << " |\n";
+        }
+    }
+    
+    cout << "\t+-----+------------------+----------+----------+----------+----------+----------+\n";
+    
+    if(count == 0) {
+        cout << "\n\tNo timesheet records found!" << endl;
+    }
+    
+    cout << "\n\tPress Enter to continue...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    employeeMenu();
+}
+
+void viewAllTimesheets() {
+    clrscrn();
+    cout << "\n\t+-----------------------------+\n";
+    cout << "\t|  A L L   T I M E S H E E T S |\n";
+    cout << "\t+-----------------------------+\n";
+    
+    char choice;
+    cout << "\n\t[1] View All Timesheets" << endl;
+    cout << "\t[2] View by Employee" << endl;
+    cout << "\t[3] View by Date" << endl;
+    cout << "\t[0] Back" << endl;
+    cout << "\n\tChoice: ";
+    cin >> choice;
+    
+    clrscrn();
+    readDataTimesheet();
+    
+    switch(choice) {
+        case '1': {
+            cout << "\n\t+-----+------------------+------------------+----------+----------+----------+----------+----------+\n";
+            cout << "\t| " << left << setw(3) << "ID" << " | " << setw(16) << "Employee Name" << " | " << setw(16) << "Date" 
+                 << " | " << setw(8) << "Clock In" << " | " << setw(8) << "Clock Out" << " | " << setw(8) << "Hours" 
+                 << " | " << setw(8) << "Status" << " |\n";
+            cout << "\t+-----+------------------+------------------+----------+----------+----------+----------+----------+\n";
+            
+            for(int i = 0; i < timesheetCount; i++) {
+                cout << "\t| " << left << setw(3) << i+1 << " | " << setw(16) << timesheets[i].employeeName 
+                     << " | " << setw(16) << timesheets[i].date << " | " << setw(8) << timesheets[i].clockInTime 
+                     << " | " << setw(8) << timesheets[i].clockOutTime << " | " << setw(8) << fixed << setprecision(2) 
+                     << timesheets[i].hoursWorked << " | " << setw(8) << timesheets[i].status << " |\n";
+            }
+            
+            cout << "\t+-----+------------------+------------------+----------+----------+----------+----------+----------+\n";
+            
+            if(timesheetCount == 0) {
+                cout << "\n\tNo timesheet records found!" << endl;
+            }
+            break;
+        }
+        case '2':
+            viewTimesheetByEmployee();
+            return;
+        case '3': {
+            string searchDate;
+            cout << "\n\tEnter Date (YYYY-MM-DD): ";
+            cin.ignore();
+            getline(cin, searchDate);
+            clrscrn();
+            
+            cout << "\n\t+-----+------------------+----------+----------+----------+----------+----------+\n";
+            cout << "\t| " << left << setw(3) << "No" << " | " << setw(16) << "Employee Name" << " | " << setw(8) 
+                 << "Clock In" << " | " << setw(8) << "Clock Out" << " | " << setw(8) << "Hours" << " | " << setw(8) 
+                 << "Status" << " |\n";
+            cout << "\t+-----+------------------+----------+----------+----------+----------+----------+\n";
+            
+            int count = 0;
+            for(int i = 0; i < timesheetCount; i++) {
+                if(timesheets[i].date == searchDate) {
+                    count++;
+                    cout << "\t| " << left << setw(3) << count << " | " << setw(16) << timesheets[i].employeeName 
+                         << " | " << setw(8) << timesheets[i].clockInTime << " | " << setw(8) << timesheets[i].clockOutTime 
+                         << " | " << setw(8) << fixed << setprecision(2) << timesheets[i].hoursWorked << " | " << setw(8) 
+                         << timesheets[i].status << " |\n";
+                }
+            }
+            
+            cout << "\t+-----+------------------+----------+----------+----------+----------+----------+\n";
+            
+            if(count == 0) {
+                cout << "\n\tNo records found for this date!" << endl;
+            }
+            break;
+        }
+        case '0':
+            adminMenu();
+            return;
+        default:
+            cout << "\n\tInvalid Choice!" << endl;
+    }
+    
+    cout << "\n\tPress Enter to continue...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    viewAllTimesheets();
+}
+
+void viewTimesheetByEmployee() {
+    readDataEmployees();
+    readDataTimesheet();
+    
+    int searchId;
+    cout << "\n\tEnter Employee ID: ";
+    cin >> searchId;
+    clrscrn();
+    
+    // Find employee name
+    string empName = "";
+    for(int i = 0; i < employeeCount; i++) {
+        if(employees[i].id == searchId) {
+            empName = employees[i].fullName;
+            break;
+        }
+    }
+    
+    if(empName == "") {
+        cout << "\n\tEmployee not found!" << endl;
+        cout << "\n\tPress Enter to continue...";
+        cin.ignore();
+        cin.get();
+        viewAllTimesheets();
+        return;
+    }
+    
+    cout << "\n\tTimesheet for: " << empName << endl;
+    cout << "\n\t+-----+------------------+----------+----------+----------+----------+\n";
+    cout << "\t| " << left << setw(3) << "No" << " | " << setw(16) << "Date" << " | " << setw(8) << "Clock In" 
+         << " | " << setw(8) << "Clock Out" << " | " << setw(8) << "Hours" << " | " << setw(8) << "Status" << " |\n";
+    cout << "\t+-----+------------------+----------+----------+----------+----------+\n";
+    
+    int count = 0;
+    for(int i = 0; i < timesheetCount; i++) {
+        if(timesheets[i].employeeId == searchId) {
+            count++;
+            cout << "\t| " << left << setw(3) << count << " | " << setw(16) << timesheets[i].date << " | " 
+                 << setw(8) << timesheets[i].clockInTime << " | " << setw(8) << timesheets[i].clockOutTime << " | " 
+                 << setw(8) << fixed << setprecision(2) << timesheets[i].hoursWorked << " | " << setw(8) 
+                 << timesheets[i].status << " |\n";
+        }
+    }
+    
+    cout << "\t+-----+------------------+----------+----------+----------+----------+----------+\n";
+    
+    if(count == 0) {
+        cout << "\n\tNo timesheet records found for this employee!" << endl;
+    }
+}
+
+void generateAttendanceFromTimesheet() {
+    clrscrn();
+    cout << "\n\t+----------------------------------------+\n";
+    cout << "\t| GENERATE ATTENDANCE FROM TIMESHEET |\n";
+    cout << "\t+----------------------------------------+\n";
+    
+    readDataEmployees();
+    readDataTimesheet();
+    
+    string monthYear;
+    cout << "\n\tEnter Month and Year (e.g. 2026-03): ";
+    cin.ignore();
+    getline(cin, monthYear);
+    
+    clrscrn();
+    attendanceCount = 0;
+    
+    ofstream attRec("attendance.txt");
+    int processedCount = 0;
+    
+    for(int i = 0; i < employeeCount; i++) {
+        double totalHours = 0;
+        double totalOvertimeHours = 0;
+        int daysPresent = 0;
+        
+        // Count records for this employee in the given month
+        for(int j = 0; j < timesheetCount; j++) {
+            if(timesheets[j].employeeId == employees[i].id && 
+               timesheets[j].date.find(monthYear) != string::npos) {
+                if(timesheets[j].status == "Present") {
+                    daysPresent++;
+                    totalHours += timesheets[j].hoursWorked;
+                    // Overtime is hours over 8 per day
+                    if(timesheets[j].hoursWorked > 8) {
+                        totalOvertimeHours += (timesheets[j].hoursWorked - 8);
+                    }
+                }
+            }
+        }
+        
+        if(daysPresent > 0) {
+            Attendance newAtt;
+            newAtt.employeeId = employees[i].id;
+            newAtt.employeeName = employees[i].fullName;
+            newAtt.hoursWorked = totalHours;
+            newAtt.overtimeHours = totalOvertimeHours;
+            newAtt.date = monthYear;
+            
+            attendances[attendanceCount] = newAtt;
+            
+            // Save to file
+            attRec << newAtt.employeeId << endl;
+            attRec << newAtt.employeeName << endl;
+            attRec << newAtt.hoursWorked << endl;
+            attRec << newAtt.overtimeHours << endl;
+            attRec << newAtt.date << endl;
+            
+            attendanceCount++;
+            processedCount++;
+        }
+    }
+    
+    attRec.close();
+    
+    clrscrn();
+    cout << "\n\t✓ Attendance Generated Successfully!" << endl;
+    cout << "\n\tTotal Employees Processed: " << processedCount << endl;
+    cout << "\n\tPress Enter to continue...";
+    cin.get();
+    clrscrn();
+    staffMenu();
+}
+
+void viewGeneratedAttendance() {
+    clrscrn();
+    cout << "\n\t+------------------------------------+\n";
+    cout << "\t| VIEW GENERATED ATTENDANCE RECORDS |\n";
+    cout << "\t+------------------------------------+\n";
+    
+    readDataAttendance();
+    
+    if(attendanceCount == 0) {
+        cout << "\n\tNo attendance records found!" << endl;
+        cout << "\n\tPress Enter to continue...";
+        cin.ignore();
+        cin.get();
+        staffMenu();
+        return;
+    }
+    
+    char choice;
+    cout << "\n\t[1] View All Attendance" << endl;
+    cout << "\t[2] Search by Employee ID" << endl;
+    cout << "\t[3] Search by Period" << endl;
+    cout << "\t[0] Back" << endl;
+    cout << "\n\tChoice: ";
+    cin >> choice;
+    
+    clrscrn();
+    
+    switch(choice) {
+        case '1': {
+            cout << "\n\t+-----+------------------+----------+----------+----------+\n";
+            cout << "\t| " << left << setw(3) << "No" << " | " << setw(16) << "Employee Name" 
+                 << " | " << setw(8) << "Hours" << " | " << setw(8) << "OT Hours" 
+                 << " | " << setw(8) << "Period" << " |\n";
+            cout << "\t+-----+------------------+----------+----------+----------+\n";
+            
+            for(int i = 0; i < attendanceCount; i++) {
+                cout << "\t| " << left << setw(3) << i+1 << " | " << setw(16) << attendances[i].employeeName 
+                     << " | " << setw(8) << fixed << setprecision(2) << attendances[i].hoursWorked 
+                     << " | " << setw(8) << fixed << setprecision(2) << attendances[i].overtimeHours 
+                     << " | " << setw(8) << attendances[i].date << " |\n";
+            }
+            
+            cout << "\t+-----+------------------+----------+----------+----------+\n";
+            break;
+        }
+        case '2': {
+            int searchId;
+            cout << "\n\tEnter Employee ID: ";
+            cin >> searchId;
+            clrscrn();
+            
+            cout << "\n\t+-----+------------------+----------+----------+----------+\n";
+            cout << "\t| " << left << setw(3) << "No" << " | " << setw(16) << "Employee Name" 
+                 << " | " << setw(8) << "Hours" << " | " << setw(8) << "OT Hours" 
+                 << " | " << setw(8) << "Period" << " |\n";
+            cout << "\t+-----+------------------+----------+----------+----------+\n";
+            
+            int count = 0;
+            for(int i = 0; i < attendanceCount; i++) {
+                if(attendances[i].employeeId == searchId) {
+                    count++;
+                    cout << "\t| " << left << setw(3) << count << " | " << setw(16) << attendances[i].employeeName 
+                         << " | " << setw(8) << fixed << setprecision(2) << attendances[i].hoursWorked 
+                         << " | " << setw(8) << fixed << setprecision(2) << attendances[i].overtimeHours 
+                         << " | " << setw(8) << attendances[i].date << " |\n";
+                }
+            }
+            
+            cout << "\t+-----+------------------+----------+----------+----------+\n";
+            
+            if(count == 0) {
+                cout << "\n\tNo records found for this employee!" << endl;
+            }
+            break;
+        }
+        case '3': {
+            string searchPeriod;
+            cout << "\n\tEnter Period (e.g. 2026-03): ";
+            cin.ignore();
+            getline(cin, searchPeriod);
+            clrscrn();
+            
+            cout << "\n\t+-----+------------------+----------+----------+----------+\n";
+            cout << "\t| " << left << setw(3) << "No" << " | " << setw(16) << "Employee Name" 
+                 << " | " << setw(8) << "Hours" << " | " << setw(8) << "OT Hours" 
+                 << " | " << setw(8) << "Period" << " |\n";
+            cout << "\t+-----+------------------+----------+----------+----------+\n";
+            
+            int count = 0;
+            for(int i = 0; i < attendanceCount; i++) {
+                if(attendances[i].date == searchPeriod) {
+                    count++;
+                    cout << "\t| " << left << setw(3) << count << " | " << setw(16) << attendances[i].employeeName 
+                         << " | " << setw(8) << fixed << setprecision(2) << attendances[i].hoursWorked 
+                         << " | " << setw(8) << fixed << setprecision(2) << attendances[i].overtimeHours 
+                         << " | " << setw(8) << attendances[i].date << " |\n";
+                }
+            }
+            
+            cout << "\t+-----+------------------+----------+----------+----------+\n";
+            
+            if(count == 0) {
+                cout << "\n\tNo records found for this period!" << endl;
+            }
+            break;
+        }
+        case '0':
+            staffMenu();
+            return;
+        default:
+            cout << "\n\tInvalid Choice!" << endl;
+    }
+    
+    cout << "\n\tPress Enter to continue...";
+    cin.ignore();
+    cin.get();
+    clrscrn();
+    viewGeneratedAttendance();
 }
