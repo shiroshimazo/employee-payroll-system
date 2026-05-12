@@ -2,10 +2,19 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <limits>
+#include <sstream>
 #include <vector>
 #include <conio.h>
 #include <ctime>
 using namespace std;
+
+const string DATA_EMPLOYEES = "employees.txt";
+const string DATA_STAFFS = "staffs.txt";
+const string DATA_ATTENDANCE = "attendance.txt";
+const string DATA_PAYROLL = "payroll.txt";
+const string DATA_TIMESHEET = "timesheet.txt";
+const string PASSWORD_MASK = "********";
 
 string getPasswordInput() {
     string password = "";
@@ -39,6 +48,11 @@ void payrollReports(), viewAllPayrolls(), viewPayrollByEmployee(), payrollSummar
 void employeeClockInOut(string loggedInUser), viewMyTimesheet(string loggedInUser);
 void viewAllTimesheets(), viewTimesheetByEmployee(), readDataTimesheet();
 void generateAttendanceFromTimesheet(), viewGeneratedAttendance();
+void saveEmployees(), saveStaffs(), saveTimesheets();
+void pauseScreen();
+void clearInput();
+double calculateHoursWorked(string clockInTime, string clockOutTime);
+string sanitizeTimesheetStatus(string status);
 
 struct Employee {
     int id;
@@ -101,15 +115,15 @@ struct Timesheet {
     string status; // Present, Absent, Late, Early Leave
 };
 
-Attendance attendances[100];
-Payroll payrolls[100];
-Timesheet timesheets[500];
+vector<Attendance> attendances;
+vector<Payroll> payrolls;
+vector<Timesheet> timesheets;
 int attendanceCount = 0;
 int payrollCount = 0;
 int timesheetCount = 0;
 
-Employee employees[100];
-Staff staffs[100];
+vector<Employee> employees;
+vector<Staff> staffs;
 int employeeCount = 0;
 int staffCount = 0;
 string loggedInUser = "";
@@ -119,208 +133,288 @@ int main() {
     return 0;
 }
 
+void clearInput() {
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+void pauseScreen() {
+    cout << "\n\tPress Enter to continue...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
+}
+
+bool parseInt(const string& text, int& value) {
+    try {
+        size_t parsed = 0;
+        value = stoi(text, &parsed);
+        return parsed == text.length();
+    } catch(...) {
+        return false;
+    }
+}
+
+bool parseDouble(const string& text, double& value) {
+    try {
+        size_t parsed = 0;
+        value = stod(text, &parsed);
+        return parsed == text.length();
+    } catch(...) {
+        return false;
+    }
+}
+
+void saveEmployees() {
+    ofstream outRec(DATA_EMPLOYEES);
+    for (const Employee& employee : employees) {
+        outRec << employee.id << endl;
+        outRec << employee.username << endl;
+        outRec << employee.password << endl;
+        outRec << employee.fullName << endl;
+        outRec << employee.gender << endl;
+        outRec << employee.contactNumber << endl;
+        outRec << employee.emailAddress << endl;
+        outRec << employee.cityAddr << endl;
+        outRec << employee.position << endl;
+        outRec << employee.sssNumber << endl;
+        outRec << employee.philhealthNumber << endl;
+        outRec << employee.pagibigNumber << endl;
+        outRec << employee.rate << endl;
+    }
+}
+
+void saveStaffs() {
+    ofstream outStaff(DATA_STAFFS);
+    for (const Staff& staff : staffs) {
+        outStaff << staff.id << endl;
+        outStaff << staff.username << endl;
+        outStaff << staff.password << endl;
+        outStaff << staff.fullName << endl;
+        outStaff << staff.role << endl;
+    }
+}
+
+void saveTimesheets() {
+    ofstream timeRec(DATA_TIMESHEET);
+    for (const Timesheet& timesheet : timesheets) {
+        timeRec << timesheet.employeeId << endl;
+        timeRec << timesheet.employeeName << endl;
+        timeRec << timesheet.clockInTime << endl;
+        timeRec << timesheet.clockOutTime << endl;
+        timeRec << timesheet.date << endl;
+        timeRec << fixed << setprecision(2) << timesheet.hoursWorked << endl;
+        timeRec << timesheet.status << endl;
+    }
+}
+
+string sanitizeTimesheetStatus(string status) {
+    const string knownStatuses[] = {"Present", "Absent", "Late", "Early Leave", "Rest Day"};
+    for (const string& knownStatus : knownStatuses) {
+        if (status == knownStatus) {
+            return status;
+        }
+        if (status.rfind(knownStatus, 0) == 0) {
+            string extraText = status.substr(knownStatus.length());
+            int ignored = 0;
+            if (!extraText.empty() && parseInt(extraText, ignored)) {
+                return knownStatus;
+            }
+        }
+    }
+    return status;
+}
+
+double calculateHoursWorked(string clockInTime, string clockOutTime) {
+    try {
+        int inHour = stoi(clockInTime.substr(0, 2));
+        int inMin = stoi(clockInTime.substr(3, 2));
+        int outHour = stoi(clockOutTime.substr(0, 2));
+        int outMin = stoi(clockOutTime.substr(3, 2));
+
+        int inMinutes = (inHour * 60) + inMin;
+        int outMinutes = (outHour * 60) + outMin;
+        if (outMinutes < inMinutes) {
+            outMinutes += 24 * 60;
+        }
+
+        return (outMinutes - inMinutes) / 60.0;
+    } catch(...) {
+        return 0.0;
+    }
+}
+
 void readDataAttendance() {
-    ifstream readAtt("attendance.txt");
+    ifstream readAtt(DATA_ATTENDANCE);
+    attendances.clear();
     attendanceCount = 0;
     string line;
     while(getline(readAtt, line)) {
+        Attendance attendance;
         if(line.empty()) continue;
-        try {
-            attendances[attendanceCount].employeeId = stoi(line);
-        } catch(...) {
+        if(!parseInt(line, attendance.employeeId)) {
             continue;
         }
-        getline(readAtt, attendances[attendanceCount].employeeName);
+        getline(readAtt, attendance.employeeName);
         getline(readAtt, line);
         if(line.empty()) continue;
-        try {
-            attendances[attendanceCount].hoursWorked = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, attendance.hoursWorked)) {
             continue;
         }
         getline(readAtt, line);
         if(line.empty()) continue;
-        try {
-            attendances[attendanceCount].overtimeHours = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, attendance.overtimeHours)) {
             continue;
         }
-        getline(readAtt, attendances[attendanceCount].date);
-        attendanceCount++;
+        getline(readAtt, attendance.date);
+        attendances.push_back(attendance);
     }
-    readAtt.close();
+    attendanceCount = static_cast<int>(attendances.size());
 }
 
 void readDataPayroll() {
-    ifstream readPay("payroll.txt");
+    ifstream readPay(DATA_PAYROLL);
+    payrolls.clear();
     payrollCount = 0;
     string line;
     while(getline(readPay, line)) {
+        Payroll payroll;
         if(line.empty()) continue;
-        
-        try {
-            payrolls[payrollCount].employeeId = stoi(line);
-        } catch(...) {
+
+        if(!parseInt(line, payroll.employeeId)) {
             continue;
         }
-        
-        getline(readPay, payrolls[payrollCount].employeeName);
-        getline(readPay, payrolls[payrollCount].position);
-        
+
+        getline(readPay, payroll.employeeName);
+        getline(readPay, payroll.position);
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].rate = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.rate)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].hoursWorked = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.hoursWorked)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].overtimeHours = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.overtimeHours)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].overtimePay = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.overtimePay)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].grossPay = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.grossPay)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].sssDeduction = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.sssDeduction)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].philhealthDeduction = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.philhealthDeduction)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].pagibigDeduction = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.pagibigDeduction)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].loanDeduction = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.loanDeduction)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].advanceFee = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.advanceFee)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].totalDeductions = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.totalDeductions)) {
             continue;
         }
-        
+
         getline(readPay, line);
         if(line.empty()) continue;
-        try {
-            payrolls[payrollCount].netPay = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, payroll.netPay)) {
             continue;
         }
-        
-        getline(readPay, payrolls[payrollCount].date);
-        payrollCount++;
+
+        getline(readPay, payroll.date);
+        payrolls.push_back(payroll);
     }
-    readPay.close();
+    payrollCount = static_cast<int>(payrolls.size());
 }
 
 void readDataEmployees() {
-    ifstream readEmp("employees.txt");
+    ifstream readEmp(DATA_EMPLOYEES);
+    employees.clear();
     employeeCount = 0;
     string line;
     while(getline(readEmp, line)) {
+        Employee employee;
         if(line.empty()) continue;
-        try {
-            employees[employeeCount].id = stoi(line);
-        } catch(...) {
+        if(!parseInt(line, employee.id)) {
             continue;
         }
-        getline(readEmp, employees[employeeCount].username);
-        getline(readEmp, employees[employeeCount].password);
-        getline(readEmp, employees[employeeCount].fullName);
-        getline(readEmp, employees[employeeCount].gender);
-        getline(readEmp, employees[employeeCount].contactNumber);
-        getline(readEmp, employees[employeeCount].emailAddress);
-        getline(readEmp, employees[employeeCount].cityAddr);
-        getline(readEmp, employees[employeeCount].position);
-        getline(readEmp, employees[employeeCount].sssNumber);
-        getline(readEmp, employees[employeeCount].philhealthNumber);
-        getline(readEmp, employees[employeeCount].pagibigNumber);
+        getline(readEmp, employee.username);
+        getline(readEmp, employee.password);
+        getline(readEmp, employee.fullName);
+        getline(readEmp, employee.gender);
+        getline(readEmp, employee.contactNumber);
+        getline(readEmp, employee.emailAddress);
+        getline(readEmp, employee.cityAddr);
+        getline(readEmp, employee.position);
+        getline(readEmp, employee.sssNumber);
+        getline(readEmp, employee.philhealthNumber);
+        getline(readEmp, employee.pagibigNumber);
         getline(readEmp, line);
         if(line.empty()) continue;
-        try {
-            employees[employeeCount].rate = stod(line);
-        } catch(...) {
+        if(!parseDouble(line, employee.rate)) {
             continue;
         }
-        employeeCount++;
+        employees.push_back(employee);
     }
-    readEmp.close(); 
+    employeeCount = static_cast<int>(employees.size());
 }
 
 void readDataStaff() {
-    ifstream readStaff("staffs.txt");
+    ifstream readStaff(DATA_STAFFS);
+    staffs.clear();
     staffCount = 0;
     string line;
     while (getline(readStaff, line)) {
+        Staff staff;
         if(line.empty()) continue;
-        try {
-            staffs[staffCount].id = stoi(line);
-        } catch(...) {
+        if(!parseInt(line, staff.id)) {
             continue;
         }
-        getline(readStaff, staffs[staffCount].username);
-        getline(readStaff, staffs[staffCount].password);
-        getline(readStaff, staffs[staffCount].fullName);
-        getline(readStaff, staffs[staffCount].role);
-        staffCount++;
+        getline(readStaff, staff.username);
+        getline(readStaff, staff.password);
+        getline(readStaff, staff.fullName);
+        getline(readStaff, staff.role);
+        staffs.push_back(staff);
     }
-    readStaff.close();
+    staffCount = static_cast<int>(staffs.size());
 }
 
 void employeeRec() {
@@ -363,8 +457,6 @@ void employeeRec() {
 
 void addEmployee() {
     readDataEmployees();
-    fstream empRec;
-    empRec.open("employees.txt", ios::app);
     bool idExists;
     cout << "\n\t-----------------------------\n";
     cout << "\t|   A D D  E M P L O Y E E  |\n";
@@ -411,25 +503,12 @@ void addEmployee() {
     cout << "\n\tEnter Rate: ";
     cin >> newEmp.rate;
 
-    employees[employeeCount] = newEmp;
-    employeeCount++;
+    employees.push_back(newEmp);
+    employeeCount = static_cast<int>(employees.size());
 
     cout << "\n\tEmployee Added Successfully!" << endl;
 
-    empRec << newEmp.id << endl;
-    empRec << newEmp.username << endl;
-    empRec << newEmp.password << endl;
-    empRec << newEmp.fullName << endl;
-    empRec << newEmp.gender << endl;
-    empRec << newEmp.contactNumber << endl;
-    empRec << newEmp.emailAddress << endl;
-    empRec << newEmp.cityAddr << endl;
-    empRec << newEmp.position << endl;
-    empRec << newEmp.sssNumber << endl;
-    empRec << newEmp.philhealthNumber << endl;
-    empRec << newEmp.pagibigNumber << endl;
-    empRec << newEmp.rate << endl;
-    empRec.close();
+    saveEmployees();
     employeeRec();
 }
 
@@ -463,7 +542,7 @@ void updateEmployee() {
         cout << "\n\t+-----+------------+------------+------------------+--------+-------------+----------------------+------------------+------------+------------------+----------------+------------------+----------+" << endl;
         cout << "\t| " << left << setw(3) << "ID" << " | " << setw(10) << "Username" << " | " << setw(10) << "Password" << " | " << setw(16) << "Full Name" << " | " << setw(6) << "Gender" << " | " << setw(11) << "Contact No." << " | " << setw(20) << "Email Address" << " | " << setw(16) << "City Address" << " | " << setw(10) << "Position" << " | " << setw(16) << "SSS No." << " | " << setw(14) << "PhilHealth No." << " | " << setw(16) << "Pag-IBIG No." << " | " << setw(8) << "Rate" << " |" << endl;
         cout << "\t+-----+------------+------------+------------------+--------+-------------+----------------------+------------------+------------+------------------+----------------+------------------+----------+" << endl;
-        cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(10) << employees[idx].username << " | " << setw(10) << employees[idx].password << " | " << setw(16) << employees[idx].fullName << " | " << setw(6) << employees[idx].gender << " | " << setw(11) << employees[idx].contactNumber << " | " << setw(20) << employees[idx].emailAddress << " | " << setw(16) << employees[idx].cityAddr << " | " << setw(10) << employees[idx].position << " | " << setw(16) << employees[idx].sssNumber << " | " << setw(14) << employees[idx].philhealthNumber << " | " << setw(16) << employees[idx].pagibigNumber << " | " << setw(8) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
+        cout << "\t| " << left << setw(3) << employees[idx].id << " | " << setw(10) << employees[idx].username << " | " << setw(10) << PASSWORD_MASK << " | " << setw(16) << employees[idx].fullName << " | " << setw(6) << employees[idx].gender << " | " << setw(11) << employees[idx].contactNumber << " | " << setw(20) << employees[idx].emailAddress << " | " << setw(16) << employees[idx].cityAddr << " | " << setw(10) << employees[idx].position << " | " << setw(16) << employees[idx].sssNumber << " | " << setw(14) << employees[idx].philhealthNumber << " | " << setw(16) << employees[idx].pagibigNumber << " | " << setw(8) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
         cout << "\t+-----+------------+------------+------------------+--------+-------------+----------------------+------------------+------------+------------------+----------------+------------------+----------+" << endl;
         if (showError) {
             cout << "\n\tInvalid Choice! Please Try Again." << endl;
@@ -586,23 +665,7 @@ void updateEmployee() {
             break;
         }
     }
-    ofstream outRec("employees.txt");
-    for (int i = 0; i < employeeCount; i++) {
-        outRec << employees[i].id << endl;
-        outRec << employees[i].username << endl;
-        outRec << employees[i].password << endl;
-        outRec << employees[i].fullName << endl;
-        outRec << employees[i].gender << endl;
-        outRec << employees[i].contactNumber << endl;
-        outRec << employees[i].emailAddress << endl;
-        outRec << employees[i].cityAddr << endl;
-        outRec << employees[i].position << endl;
-        outRec << employees[i].sssNumber << endl;
-        outRec << employees[i].philhealthNumber << endl;
-        outRec << employees[i].pagibigNumber << endl;
-        outRec << employees[i].rate << endl;
-    }
-    outRec.close();
+    saveEmployees();
     cout << "\n\t+-----+------------+------------+----------------------+--------+--------------+--------------------------+----------------------+----------------------+--------------------+----------------+--------------------+----------+" << endl;
     cout << "\t| " << left << setw(3)  << "ID"
          << " | " << setw(10) << "Username"
@@ -621,7 +684,7 @@ void updateEmployee() {
     cout << "\t+-----+------------+------------+----------------------+--------+--------------+--------------------------+----------------------+----------------------+--------------------+----------------+--------------------+----------+" << endl;
     cout << "\t| " << left << setw(3)  << employees[idx].id
          << " | " << setw(10) << employees[idx].username
-         << " | " << setw(10) << employees[idx].password
+         << " | " << setw(10) << PASSWORD_MASK
          << " | " << setw(20) << employees[idx].fullName
          << " | " << setw(6)  << employees[idx].gender
          << " | " << setw(12) << employees[idx].contactNumber
@@ -675,7 +738,7 @@ void viewEmployee() {
                 for (int i = 0; i < employeeCount; i++) {
                     cout << "\t| " << left << setw(3)  << employees[i].id
                          << " | " << setw(10) << employees[i].username
-                         << " | " << setw(10) << employees[i].password
+                         << " | " << setw(10) << PASSWORD_MASK
                          << " | " << setw(20) << employees[i].fullName
                          << " | " << setw(6)  << employees[i].gender
                          << " | " << setw(12) << employees[i].contactNumber
@@ -720,7 +783,7 @@ void viewEmployee() {
                         cout << "\t+-----+------------+------------+----------------------+--------+--------------+--------------------------+----------------------+----------------------+--------------------+----------------+--------------------+----------+" << endl;
                         cout << "\t| " << left << setw(3)  << employees[i].id
                              << " | " << setw(10) << employees[i].username
-                             << " | " << setw(10) << employees[i].password
+                             << " | " << setw(10) << PASSWORD_MASK
                              << " | " << setw(20) << employees[i].fullName
                              << " | " << setw(6)  << employees[i].gender
                              << " | " << setw(12) << employees[i].contactNumber
@@ -777,9 +840,12 @@ void deleteEmployee() {
         return;
     }
     cout << "\n\tEmployee to Delete:" << endl;
-    cout << "\n\t+-----+------------+------------+------------------+--------+-------------+----------------------+------------------+----------------------+--------------------+----------------+--------------------+----------+" << endl;
-    cout << "\t| " << left << setw(3) << "ID" << " | " << setw(10) << "Username" << " | " << setw(10) << "Password" << " | " << setw(16) << "Full Name" << " | " << setw(6) << "Gender" << " | " << setw(11) << "Contact No." << " | " << setw(20) << "Email Address" << " | " << setw(16) << "City Address" << " | " << setw(20) << "Position" << " | " << setw(16) << "SSS No." << " | " << setw(14) << "PhilHealth No." << " | " << setw(16) << "Pag-IBIG No." <<(" | ") << setw(8) << fixed << setprecision(2) << employees[idx].rate << " |" << endl;
-    cout << "\t+-----+------------+------------+------------------+--------+-------------+----------------------+------------------+----------------------+--------------------+----------------+--------------------+----------+" << endl;
+    cout << "\n\tID           : " << employees[idx].id << endl;
+    cout << "\tUsername     : " << employees[idx].username << endl;
+    cout << "\tPassword     : " << PASSWORD_MASK << endl;
+    cout << "\tFull Name    : " << employees[idx].fullName << endl;
+    cout << "\tPosition     : " << employees[idx].position << endl;
+    cout << "\tRate         : P " << fixed << setprecision(2) << employees[idx].rate << endl;
     cout << "\n\tAre you sure?" << endl;
     cout << "\t[1] Delete Row of Data" << endl;
     cout << "\t[2] Cancel" << endl;
@@ -788,27 +854,9 @@ void deleteEmployee() {
     cin >> choice;
     clrscrn();
     if (choice == '1') {
-        for (int i = idx; i < employeeCount - 1; i++) {
-            employees[i] = employees[i + 1];
-        }
-        employeeCount--;
-        ofstream outRec("employees.txt");
-        for (int i = 0; i < employeeCount; i++) {
-            outRec << employees[i].id << endl;
-            outRec << employees[i].username << endl;
-            outRec << employees[i].password << endl;
-            outRec << employees[i].fullName << endl;
-            outRec << employees[i].gender << endl;
-            outRec << employees[i].contactNumber << endl;
-            outRec << employees[i].emailAddress << endl;
-            outRec << employees[i].cityAddr << endl;
-            outRec << employees[i].position << endl;
-            outRec << employees[i].sssNumber << endl;
-            outRec << employees[i].philhealthNumber << endl;
-            outRec << employees[i].pagibigNumber << endl;
-            outRec << employees[i].rate << endl;
-        }
-        outRec.close();
+        employees.erase(employees.begin() + idx);
+        employeeCount = static_cast<int>(employees.size());
+        saveEmployees();
         cout << "\n\tEmployee deleted successfully!" << endl;
     } else {
         cout << "\n\tDeletion cancelled!" << endl;
@@ -856,8 +904,6 @@ void staffsRec() {
 
 void addStaff() {
     readDataStaff();
-    fstream staffRec;
-    staffRec.open("staffs.txt", ios::app);
     bool idExists;
     cout << "\n\t---------------------------------\n";
     cout << "\t|   A D D   N E W   S T A F F   |\n";
@@ -887,17 +933,12 @@ void addStaff() {
     cout << "\n\tEnter Role: ";
     getline(cin, newStaff.role);
 
-    staffs[staffCount] = newStaff;
-    staffCount++;
+    staffs.push_back(newStaff);
+    staffCount = static_cast<int>(staffs.size());
 
     cout << "\n\tStaff Added Successfully!" << endl;
 
-    staffRec << newStaff.id << endl;
-    staffRec << newStaff.username << endl;
-    staffRec << newStaff.password << endl;
-    staffRec << newStaff.fullName << endl;
-    staffRec << newStaff.role << endl;
-    staffRec.close();
+    saveStaffs();
     staffsRec();
 }
 
@@ -924,7 +965,7 @@ void viewStaff() {
                 cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(10) << "Role" << " |" << endl;
                 cout << "\t+-----+---------------+---------------+----------------------+------------+" << endl;
                 for (int i = 0; i < staffCount; i++) {
-                    cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << staffs[i].password << " | " << setw(20) << staffs[i].fullName << " | " << setw(10) << staffs[i].role << " |" << endl;
+                    cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << PASSWORD_MASK << " | " << setw(20) << staffs[i].fullName << " | " << setw(10) << staffs[i].role << " |" << endl;
                 }
                 cout << "\t+-----+---------------+---------------+----------------------+------------+" << endl;
             }
@@ -943,7 +984,7 @@ void viewStaff() {
                         cout << "\n\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
                         cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(15) << "Role" << " |" << endl;
                         cout << "\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
-                        cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << staffs[i].password << " | " << setw(20) << staffs[i].fullName << " | " << setw(15) << staffs[i].role << " |" << endl;
+                        cout << "\t| " << left << setw(3) << staffs[i].id << " | " << setw(13) << staffs[i].username << " | " << setw(13) << PASSWORD_MASK << " | " << setw(20) << staffs[i].fullName << " | " << setw(15) << staffs[i].role << " |" << endl;
                         cout << "\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
                         found = true;
                         break;
@@ -995,7 +1036,7 @@ void updateStaff() {
         cout << "\n\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
         cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(15) << "Role" << " |" << endl;
         cout << "\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
-        cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].username << " | " << setw(13) << staffs[idx].password << " | " << setw(20) << staffs[idx].fullName << " | " << setw(15) << staffs[idx].role << " |" << endl;
+        cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].username << " | " << setw(13) << PASSWORD_MASK << " | " << setw(20) << staffs[idx].fullName << " | " << setw(15) << staffs[idx].role << " |" << endl;
         cout << "\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
         if (showError) {
             cout << "\n\t>> Invalid Choice! Please Try Again." << endl;
@@ -1050,21 +1091,12 @@ void updateStaff() {
             break;
         }
     }
-    ofstream outStaff("staffs.txt");
-    for(int i = 0; i < staffCount; i++) {
-        outStaff << staffs[i].id << "\n";
-        outStaff << staffs[i].username << "\n";
-        outStaff << staffs[i].password << "\n";
-        outStaff << staffs[i].fullName << "\n";
-        outStaff << staffs[i].role << "\n";
-    }
-
-    outStaff.close();
+    saveStaffs();
     cout << "\n\tUpdated Staff Data:" << endl;
     cout << "\n\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
     cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(15) << "Role" << " |" << endl;
     cout << "\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
-    cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].username << " | " << setw(13) << staffs[idx].password << " | " << setw(20) << staffs[idx].fullName << " | " << setw(15) << staffs[idx].role << " |" << endl;
+    cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].username << " | " << setw(13) << PASSWORD_MASK << " | " << setw(20) << staffs[idx].fullName << " | " << setw(15) << staffs[idx].role << " |" << endl;
     cout << "\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
     updateStaff();
 }
@@ -1090,12 +1122,13 @@ void deleteStaff() {
     if(!found) {
         cout << "\n\tStaff not found!" << endl;
         staffsRec();
+        return;
     }
     cout << "\n\tStaff to delete:" << endl;
     cout << "\n\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
     cout << "\t| " << left << setw(3) << "ID" << " | " << setw(13) << "Username" << " | " << setw(13) << "Password" << " | " << setw(20) << "Full Name" << " | " << setw(15) << "Role" << " |" << endl;
     cout << "\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
-    cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].username << " | " << setw(13) << staffs[idx].password << " | " << setw(20) << staffs[idx].fullName << " | " << setw(15) << staffs[idx].role << " |" << endl;
+    cout << "\t| " << left << setw(3) << staffs[idx].id << " | " << setw(13) << staffs[idx].username << " | " << setw(13) << PASSWORD_MASK << " | " << setw(20) << staffs[idx].fullName << " | " << setw(15) << staffs[idx].role << " |" << endl;
     cout << "\t+-----+---------------+---------------+----------------------+-----------------+" << endl;
     cout << "\n\tAre you sure?" << endl;
     cout << "\t[1] Delete Row of Data" << endl;
@@ -1105,19 +1138,9 @@ void deleteStaff() {
     cin >> choice;
     clrscrn();
     if (choice == '1') {
-        for (int i = idx; i < staffCount - 1; i++) {
-            staffs[i] = staffs[i + 1];
-        }
-        staffCount--;
-        ofstream outStaff("staffs.txt");
-        for(int i = 0; i < staffCount; i++) {
-            outStaff << staffs[i].id << "\n";
-            outStaff << staffs[i].username << "\n";
-            outStaff << staffs[i].password << "\n";
-            outStaff << staffs[i].fullName << "\n";
-            outStaff << staffs[i].role << "\n";
-        }
-        outStaff.close();
+        staffs.erase(staffs.begin() + idx);
+        staffCount = static_cast<int>(staffs.size());
+        saveStaffs();
         cout << "\n\tStaff deleted successfully!" << endl;
     } else {
         cout << "\n\tDeletion cancelled!" << endl;
@@ -1664,7 +1687,7 @@ void inputAttendance() {
 
     // Save to attendance.txt
     fstream attFile;
-    attFile.open("attendance.txt", ios::app);
+    attFile.open(DATA_ATTENDANCE, ios::app);
     attFile << newAtt.employeeId << endl;
     attFile << newAtt.employeeName << endl;
     attFile << newAtt.hoursWorked << endl;
@@ -1868,7 +1891,7 @@ void computeSalary() {
         cin >> confirm;
         if (confirm == 'y' || confirm == 'Y') {
             fstream payFile;
-            payFile.open("payroll.txt", ios::app);
+            payFile.open(DATA_PAYROLL, ios::app);
             payFile << employees[empIdx].id << endl;
             payFile << employees[empIdx].fullName << endl;
             payFile << employees[empIdx].position << endl;
@@ -2021,6 +2044,7 @@ void employeeMenu() {
 
 void viewSalaryInfo() {
     readDataPayroll();
+    readDataEmployees();
     
     cout << "\n\t+----------------------------------+\n";
     cout << "\t| V I E W  S A L A R Y  I N F O    |\n";
@@ -2190,23 +2214,7 @@ void changePassword() {
             }
         }
 
-        ofstream outRec("employees.txt");
-        for (int i = 0; i < employeeCount; i++) {
-            outRec << employees[i].id << endl;
-            outRec << employees[i].username << endl;
-            outRec << employees[i].password << endl;
-            outRec << employees[i].fullName << endl;
-            outRec << employees[i].gender << endl;
-            outRec << employees[i].contactNumber << endl;
-            outRec << employees[i].emailAddress << endl;
-            outRec << employees[i].cityAddr << endl;
-            outRec << employees[i].position << endl;
-            outRec << employees[i].sssNumber << endl;
-            outRec << employees[i].philhealthNumber << endl;
-            outRec << employees[i].pagibigNumber << endl;
-            outRec << employees[i].rate << endl;
-        }
-        outRec.close();
+        saveEmployees();
         cout << "\n\tPassword changed successfully!" << endl;
     } else {
         cout << "\n\tInvalid Username or Old Password!" << endl;
@@ -2296,33 +2304,61 @@ string getCurrentDate() {
 }
 
 void readDataTimesheet() {
-    ifstream readTime("timesheet.txt");
+    ifstream readTime(DATA_TIMESHEET);
+    timesheets.clear();
     timesheetCount = 0;
     string line;
-    
+
+    vector<string> lines;
     while(getline(readTime, line)) {
-        if(line.empty()) continue;
-        try {
-            timesheets[timesheetCount].employeeId = stoi(line);
-        } catch(...) {
-            continue;
-        }
-        getline(readTime, timesheets[timesheetCount].employeeName);
-        getline(readTime, timesheets[timesheetCount].clockInTime);
-        getline(readTime, timesheets[timesheetCount].clockOutTime);
-        getline(readTime, timesheets[timesheetCount].date);
-        getline(readTime, line);
-        if(!line.empty()) {
-            try {
-                timesheets[timesheetCount].hoursWorked = stod(line);
-            } catch(...) {
-                timesheets[timesheetCount].hoursWorked = 0;
+        lines.push_back(line);
+    }
+
+    const string knownStatuses[] = {"Present", "Absent", "Late", "Early Leave", "Rest Day"};
+    for(size_t i = 0; i < lines.size(); i++) {
+        for(const string& knownStatus : knownStatuses) {
+            if(lines[i].rfind(knownStatus, 0) == 0 && lines[i].length() > knownStatus.length()) {
+                string mergedId = lines[i].substr(knownStatus.length());
+                int ignored = 0;
+                if(parseInt(mergedId, ignored)) {
+                    lines[i] = knownStatus;
+                    lines.insert(lines.begin() + static_cast<long long>(i) + 1, mergedId);
+                }
+                break;
             }
         }
-        getline(readTime, timesheets[timesheetCount].status);
-        timesheetCount++;
     }
-    readTime.close();
+
+    size_t index = 0;
+    while(index < lines.size()) {
+        if(lines[index].empty()) {
+            index++;
+            continue;
+        }
+        if(index + 6 >= lines.size()) {
+            break;
+        }
+
+        Timesheet timesheet;
+        if(!parseInt(lines[index], timesheet.employeeId)) {
+            index++;
+            continue;
+        }
+
+        timesheet.employeeName = lines[index + 1];
+        timesheet.clockInTime = lines[index + 2];
+        timesheet.clockOutTime = lines[index + 3];
+        timesheet.date = lines[index + 4];
+        if(!parseDouble(lines[index + 5], timesheet.hoursWorked)) {
+            timesheet.hoursWorked = 0.0;
+        }
+        timesheet.status = sanitizeTimesheetStatus(lines[index + 6]);
+
+        timesheets.push_back(timesheet);
+        index += 7;
+    }
+
+    timesheetCount = static_cast<int>(timesheets.size());
 }
 
 void employeeClockInOut(string loggedInUser) {
@@ -2352,58 +2388,33 @@ void employeeClockInOut(string loggedInUser) {
     
     string currentDate = getCurrentDate();
     string currentTime = getCurrentTime();
-    
-    // Validation: Check today's attendance status
-    bool hasTimeIn = false;
-    bool hasTimeOut = false;
-    int lastIndex = -1;
-    
+
+    int openIndex = -1;
+    int completedSessions = 0;
+    double todayHours = 0.0;
+
     for(int i = 0; i < timesheetCount; i++) {
         if(timesheets[i].employeeId == empId && timesheets[i].date == currentDate) {
-            lastIndex = i;
-            // Check if Time In exists
-            if(timesheets[i].clockInTime != "N/A" && timesheets[i].clockInTime != "") {
-                hasTimeIn = true;
+            bool hasClockIn = timesheets[i].clockInTime != "N/A" && timesheets[i].clockInTime != "" && timesheets[i].clockInTime != "-";
+            bool missingClockOut = timesheets[i].clockOutTime == "N/A" || timesheets[i].clockOutTime == "" || timesheets[i].clockOutTime == "-";
+
+            if(hasClockIn && missingClockOut) {
+                openIndex = i;
+            } else if(hasClockIn) {
+                completedSessions++;
+                todayHours += timesheets[i].hoursWorked;
             }
-            // Check if Time Out exists
-            if(timesheets[i].clockOutTime != "N/A" && timesheets[i].clockOutTime != "") {
-                hasTimeOut = true;
-            }
-            break;
         }
     }
-    
+
     cout << "\n\tEmployee: " << empName << endl;
     cout << "\tDate: " << currentDate << endl;
     cout << "\tCurrent Time: " << currentTime << endl;
+    cout << "\tCompleted Sessions Today: " << completedSessions << endl;
+    cout << "\tTotal Hours Today: " << fixed << setprecision(2) << todayHours << endl;
     cout << "\n";
-    
-    // Requirement 3: Both Time In and Time Out completed
-    if(hasTimeIn && hasTimeOut) {
-        clrscrn();
-        string displayTimeIn = (lastIndex >= 0) ? timesheets[lastIndex].clockInTime : "N/A";
-        string displayTimeOut = (lastIndex >= 0) ? timesheets[lastIndex].clockOutTime : "N/A";
-        
-        cout << "\n\t+----------------------------------+\n";
-        cout << "\t| ATTENDANCE ALREADY COMPLETED   |\n";
-        cout << "\t+----------------------------------+\n";
-        cout << "\t| You have already completed your |\n";
-        cout << "\t| attendance for today.           |\n";
-        cout << "\t|                                  |\n";
-        cout << "\t| Time In:  " << setw(20) << left << displayTimeIn << " |\n";
-        cout << "\t| Time Out: " << setw(20) << left << displayTimeOut << " |\n";
-        cout << "\t|                                  |\n";
-        cout << "\t| Please come back tomorrow.      |\n";
-        cout << "\t+----------------------------------+\n";
-        cout << "\n\tPress Enter to continue...";
-        cin.ignore();
-        cin.get();
-        clrscrn();
-        employeeMenu();
-        return;
-    }
-    
-    if(!hasTimeIn) {
+
+    if(openIndex == -1) {
         cout << "\t+----------------------------------+\n";
         cout << "\t| [1] Clock In                     |\n";
         cout << "\t| [0] Cancel                       |\n";
@@ -2411,7 +2422,7 @@ void employeeClockInOut(string loggedInUser) {
         cout << "\tChoice: ";
         char choice;
         cin >> choice;
-        
+
         if(choice == '1') {
             Timesheet newTimesheet;
             newTimesheet.employeeId = empId;
@@ -2421,20 +2432,11 @@ void employeeClockInOut(string loggedInUser) {
             newTimesheet.date = currentDate;
             newTimesheet.hoursWorked = 0.0;
             newTimesheet.status = "Present";
-            
-            timesheets[timesheetCount] = newTimesheet;
-            timesheetCount++;
-            
-            ofstream timeRec("timesheet.txt", ios::app);
-            timeRec << newTimesheet.employeeId << endl;
-            timeRec << newTimesheet.employeeName << endl;
-            timeRec << newTimesheet.clockInTime << endl;
-            timeRec << newTimesheet.clockOutTime << endl;
-            timeRec << newTimesheet.date << endl;
-            timeRec << newTimesheet.hoursWorked << endl;
-            timeRec << newTimesheet.status << endl;
-            timeRec.close();
-            
+
+            timesheets.push_back(newTimesheet);
+            timesheetCount = static_cast<int>(timesheets.size());
+            saveTimesheets();
+
             clrscrn();
             cout << "\n\t+----------------------------------+\n";
             cout << "\t| SUCCESS: TIME IN RECORDED        |\n";
@@ -2448,54 +2450,40 @@ void employeeClockInOut(string loggedInUser) {
             employeeMenu();
             return;
         }
-    } 
-    // Requirement 2: Time Out validation
-    else if(hasTimeIn && !hasTimeOut) {
+    } else {
         cout << "\t+----------------------------------+\n";
         cout << "\t| [1] Clock Out                    |\n";
+        cout << "\t| [2] View Open Session            |\n";
         cout << "\t| [0] Cancel                       |\n";
         cout << "\t+----------------------------------+\n";
         cout << "\tChoice: ";
         char choice;
         cin >> choice;
-        
+
         if(choice == '1') {
-            if(lastIndex >= 0) {
-                // Update the record with clock out time
-                timesheets[lastIndex].clockOutTime = currentTime;
-                
-                // Calculate hours worked
-                int inHour = stoi(timesheets[lastIndex].clockInTime.substr(0, 2));
-                int inMin = stoi(timesheets[lastIndex].clockInTime.substr(3, 2));
-                int outHour = stoi(currentTime.substr(0, 2));
-                int outMin = stoi(currentTime.substr(3, 2));
-                
-                double hoursWorked = (outHour - inHour) + (outMin - inMin) / 60.0;
-                timesheets[lastIndex].hoursWorked = hoursWorked;
-                
-                // Rewrite the entire timesheet file
-                ofstream timeRec("timesheet.txt");
-                for(int i = 0; i < timesheetCount; i++) {
-                    timeRec << timesheets[i].employeeId << endl;
-                    timeRec << timesheets[i].employeeName << endl;
-                    timeRec << timesheets[i].clockInTime << endl;
-                    timeRec << timesheets[i].clockOutTime << endl;
-                    timeRec << timesheets[i].date << endl;
-                    timeRec << timesheets[i].hoursWorked << endl;
-                    timeRec << timesheets[i].status << endl;
-                }
-                timeRec.close();
-                
-                clrscrn();
-                cout << "\n\t+----------------------------------+\n";
-                cout << "\t| SUCCESS: TIME OUT RECORDED       |\n";
-                cout << "\t+----------------------------------+\n";
-                cout << "\t| Time In:    " << setw(20) << left << timesheets[lastIndex].clockInTime << " |\n";
-                cout << "\t| Time Out:   " << setw(20) << left << currentTime << " |\n";
-                cout << "\t| Hours: " << setw(25) << left << fixed << setprecision(2) << hoursWorked << " |\n";
-                cout << "\t| Status: COMPLETE                 |\n";
-                cout << "\t+----------------------------------+\n";
-            }
+            timesheets[openIndex].clockOutTime = currentTime;
+            double hoursWorked = calculateHoursWorked(timesheets[openIndex].clockInTime, currentTime);
+            timesheets[openIndex].hoursWorked = hoursWorked;
+            timesheets[openIndex].status = "Present";
+            saveTimesheets();
+
+            clrscrn();
+            cout << "\n\t+----------------------------------+\n";
+            cout << "\t| SUCCESS: TIME OUT RECORDED       |\n";
+            cout << "\t+----------------------------------+\n";
+            cout << "\t| Time In:    " << setw(20) << left << timesheets[openIndex].clockInTime << " |\n";
+            cout << "\t| Time Out:   " << setw(20) << left << currentTime << " |\n";
+            cout << "\t| Hours: " << setw(25) << left << fixed << setprecision(2) << hoursWorked << " |\n";
+            cout << "\t| Status: COMPLETE                 |\n";
+            cout << "\t+----------------------------------+\n";
+        } else if(choice == '2') {
+            clrscrn();
+            cout << "\n\t+----------------------------------+\n";
+            cout << "\t| OPEN CLOCK-IN SESSION            |\n";
+            cout << "\t+----------------------------------+\n";
+            cout << "\t| Time In: " << setw(23) << left << timesheets[openIndex].clockInTime << " |\n";
+            cout << "\t| Date:    " << setw(23) << left << timesheets[openIndex].date << " |\n";
+            cout << "\t+----------------------------------+\n";
         } else {
             clrscrn();
             employeeMenu();
@@ -2503,9 +2491,7 @@ void employeeClockInOut(string loggedInUser) {
         }
     }
     
-    cout << "\n\tPress Enter to continue...";
-    cin.ignore();
-    cin.get();
+    pauseScreen();
     clrscrn();
     employeeMenu();
 }
@@ -2715,39 +2701,36 @@ void generateAttendanceFromTimesheet() {
     
     clrscrn();
     attendanceCount = 0;
+    attendances.clear();
     
-    ofstream attRec("attendance.txt");
+    ofstream attRec(DATA_ATTENDANCE);
     int processedCount = 0;
     
     for(int i = 0; i < employeeCount; i++) {
         double totalHours = 0;
-        double totalOvertimeHours = 0;
-        int daysPresent = 0;
+        int completedSessions = 0;
         
         // Count records for this employee in the given month
         for(int j = 0; j < timesheetCount; j++) {
             if(timesheets[j].employeeId == employees[i].id && 
                timesheets[j].date.find(monthYear) != string::npos) {
-                if(timesheets[j].status == "Present") {
-                    daysPresent++;
+                bool completedSession = timesheets[j].clockOutTime != "N/A" && timesheets[j].clockOutTime != "" && timesheets[j].clockOutTime != "-";
+                if(timesheets[j].status == "Present" && completedSession) {
+                    completedSessions++;
                     totalHours += timesheets[j].hoursWorked;
-                    // Overtime is hours over 8 per day
-                    if(timesheets[j].hoursWorked > 8) {
-                        totalOvertimeHours += (timesheets[j].hoursWorked - 8);
-                    }
                 }
             }
         }
         
-        if(daysPresent > 0) {
+        if(completedSessions > 0) {
             Attendance newAtt;
             newAtt.employeeId = employees[i].id;
             newAtt.employeeName = employees[i].fullName;
             newAtt.hoursWorked = totalHours;
-            newAtt.overtimeHours = totalOvertimeHours;
+            newAtt.overtimeHours = 0;
             newAtt.date = monthYear;
             
-            attendances[attendanceCount] = newAtt;
+            attendances.push_back(newAtt);
             
             // Save to file
             attRec << newAtt.employeeId << endl;
@@ -2756,7 +2739,7 @@ void generateAttendanceFromTimesheet() {
             attRec << newAtt.overtimeHours << endl;
             attRec << newAtt.date << endl;
             
-            attendanceCount++;
+            attendanceCount = static_cast<int>(attendances.size());
             processedCount++;
         }
     }
